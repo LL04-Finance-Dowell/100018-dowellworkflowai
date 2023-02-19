@@ -1,0 +1,201 @@
+import { useForm } from "react-hook-form";
+import Select from "../../../../../select/Select";
+import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import FormLayout from "../../../../../formLayout/FormLayout";
+import AssignButton from "../../../../../assignButton/AssignButton";
+import { updateSingleProcessStep } from "../../../../../../../features/app/appSlice";
+import { useDispatch, useSelector } from "react-redux";
+
+const AssignTask = ({ currentStepIndex }) => {
+  const {
+    register,
+    handleSubmit,
+
+    formState: { isSubmitSuccessful },
+  } = useForm();
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { docCurrentWorkflow } = useSelector((state) => state.app);
+
+  const onSubmit = (data) => {
+    setLoading(true);
+    console.log("task", data);
+    
+    const initialProcessStepObj = {
+      workflow: docCurrentWorkflow._id,
+      indexToUpdate: currentStepIndex,
+    }
+    
+    dispatch(updateSingleProcessStep({ ...initialProcessStepObj, "stepTaskType": data.taskType }))
+    dispatch(updateSingleProcessStep({ ...initialProcessStepObj, "stepRights": data.rights }))
+    dispatch(updateSingleProcessStep({ ...initialProcessStepObj, "stepProcessingOrder": data.memberOrder }))
+    dispatch(updateSingleProcessStep({ ...initialProcessStepObj, "stepTaskLimitation": data.limitTaskTo }))
+    dispatch(updateSingleProcessStep({ ...initialProcessStepObj, "stepActivityType": data.activityType }))
+
+    setLoading(false);
+  };
+
+  return (
+    <FormLayout isSubmitted={isSubmitSuccessful} loading={loading}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Select
+          label="member order"
+          register={register}
+          name="memberOrder"
+          options={memberOrder}
+          takeNormalValue={true}
+        />
+        <Select
+          label="Task Type"
+          register={register}
+          name="taskType"
+          options={taskType}
+          takeNormalValue={true}
+        />
+        <Select
+          label="Rights"
+          register={register}
+          name="rights"
+          options={rights}
+          takeNormalValue={true}
+        />
+        <Select
+          label="activity type"
+          register={register}
+          name="activityType"
+          options={activityType}
+          takeNormalValue={true}
+        />
+        <Select
+          label="limit task to"
+          register={register}
+          name="limitTaskTo"
+          options={limitTaskTo}
+          takeNormalValue={true}
+        />
+        <AssignButton loading={loading} buttonText="Assign Task" />
+      </form>
+    </FormLayout>
+  );
+};
+
+export default AssignTask;
+
+export const memberOrder = [
+  {
+    id: uuidv4(),
+    option: "No order (Parallel processing)",
+    normalValue: "no_order"
+  },
+  {
+    id: uuidv4(),
+    option: "Team Member > User > Public",
+    normalValue: "team_user_public",
+  },
+  {
+    id: uuidv4(),
+    option: "Team Member > Public > User",
+    normalValue: "team_public_user",
+  },
+  {
+    id: uuidv4(),
+    option: "User > Team Member > Public",
+    normalValue: "user_team_public",
+  },
+  {
+    id: uuidv4(),
+    option: "User > Public > Team Member",
+    normalValue: "user_public_team",
+  },
+  {
+    id: uuidv4(),
+    option: "Public > User > Team Member",
+    normalValue: "public_user_team",
+  },
+  {
+    id: uuidv4(),
+    option: "Public > Team Member > User ",
+    normalValue: "public_team_user",
+  },
+];
+
+export const taskType = [
+  {
+    id: uuidv4(),
+    option: "Request for task",
+    normalValue: "request_for_task", 
+  },
+  {
+    id: uuidv4(),
+    option: "Assign task",
+    normalValue: "assign_task",
+  },
+];
+
+export const rights = [
+  {
+    id: uuidv4(),
+    option: "Add/Edit",
+    normalValue: "add_edit"
+  },
+  { id: uuidv4(), option: "View", normalValue: "view" },
+  { id: uuidv4(), option: "Comment", normalValue: "comment" },
+  { id: uuidv4(), option: "Approve", normalValue: "approve" },
+];
+
+export const activityType = [
+  {
+    id: uuidv4(),
+    option: "Team Task",
+    normalValue: "team_task"
+  },
+  { id: uuidv4(), option: "Individual Task", normalValue: "individual_task" },
+];
+
+export const limitTaskTo = [
+  {
+    id: uuidv4(),
+    option: "Portfolios assigned on or before step start date & time",
+    normalValue: "portfolios_assigned_on_or_before_step_start_date_and_time",
+  },
+  // {
+  //   id: uuidv4(),
+  //   option: "Portfolios assigned on or before step end date & time",
+  // },
+];
+
+export const members = [
+  {
+    id: uuidv4(),
+    option: "Member 1",
+  },
+  {
+    id: uuidv4(),
+    option: "Member 2",
+  },
+  {
+    id: uuidv4(),
+    option: "Member 3",
+  },
+];
+
+export const taskFeatures = [
+  { id: uuidv4(), feature: "Add/Edit" },
+  { id: uuidv4(), feature: "View" },
+  { id: uuidv4(), feature: "Comment" },
+  { id: uuidv4(), feature: "Approve" },
+];
+
+export const membersPortfolio = [
+  { id: uuidv4(), option: "Member Porfolio 1" },
+  { id: uuidv4(), option: "Member Porfolio 2" },
+  { id: uuidv4(), option: "Member Porfolio 3" },
+];
+
+export const displayDocument = [
+  { id: uuidv4(), option: "Display document before processing this step" },
+  { id: uuidv4(), option: "Display document after processing this step" },
+  { id: uuidv4(), option: "Display document only in this step" },
+  { id: uuidv4(), option: "Display document in all steps" },
+];

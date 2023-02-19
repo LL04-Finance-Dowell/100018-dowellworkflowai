@@ -1,0 +1,47 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px;
+}
+
+.section__container {
+  width: var(--primary-section-width);
+  display: flex;
+  flex-direction: column;
+  gap: 100px;
+}
+
+.tasks__container {
+  display: flex;
+  width: 100%;
+  gap: 30px;
+  padding: 10px;
+}
+
+.dowell__Advert__Container {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  padding: 0 10px;
+}
+
+.skeleton__box {
+  width: 48%;
+  height: 250px;
+  position: relative;
+}
+
+.iframe__Title {
+  color: var(--e-global-color-accent);
+  font-size: 1.1rem;
+  position: absolute;
+  top: -12%;
+  text-transform: capitalize;
+}
+
+@media (max-width: 768px) {
+  .tasks__container {
+    flex-direction: column;
+  }
+}

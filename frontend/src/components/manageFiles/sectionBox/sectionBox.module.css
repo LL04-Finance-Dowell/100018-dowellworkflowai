@@ -1,0 +1,29 @@
+.container {
+  padding: 10px;
+}
+
+.content__container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.content__box {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid__box {
+  /* width: 100%; */
+  display: flex;
+  /*   grid-template-columns: 1fr 1fr 1fr; */
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.grid__box button {
+  font-size: 16px;
+  margin-top: 15px;
+  background-color: var(--e-global-color-secondary);
+  color: white !important;
+}
