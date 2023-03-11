@@ -11,8 +11,9 @@ import {
   savedTemplates,
 } from "../../../features/template/asyncThunks";
 import TemplateCard from "../../../components/hoverCard/templateCard/TemplateCard";
+import { useNavigate } from "react-router-dom";
 
-const TemplatesPage = () => {
+const TemplatesPage = ({ home, showOnlySaved }) => {
   const { userDetail } = useSelector((state) => state.auth);
 
   const {
@@ -24,6 +25,7 @@ const TemplatesPage = () => {
     allTemplatesStatus,
   } = useSelector((state) => state.template);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   console.log("mining templateeeeeeeeeeeeeeeeeee", minedTemplates);
 
@@ -39,37 +41,48 @@ const TemplatesPage = () => {
     if (allTemplatesStatus === "idle") dispatch(allTemplates(data.company_id));
   }, []);
 
+  useEffect(() => {
+    if (showOnlySaved) navigate("#saved-templates")
+    if (home) navigate('#drafts')
+  }, [showOnlySaved, home])
+
   console.log("allTemplatesArrayallTemplatesArray", allTemplatesArray);
 
   return (
     <WorkflowLayout>
       <div id="new-template">
-        <ManageFiles title="Template">
-          <div id="drafts">
-            <SectionBox
-              cardBgColor="#1ABC9C"
-              title="drafts"
-              Card={TemplateCard}
-              cardItems={
-                allTemplatesArray &&
-                allTemplatesArray.length &&
-                allTemplatesArray.filter(
-                  (item) =>
-                    item.created_by === userDetail?.portfolio_info[0].username
-                )
-              }
-              status={allTemplatesStatus}
-            />
-          </div>
-          <div id="saved-templates">
-            <SectionBox
-              cardBgColor="#1ABC9C"
-              title="saved templates"
-              Card={TemplateCard}
-              cardItems={allTemplatesArray}
-              status={allTemplatesStatus}
-            />
-          </div>
+        <ManageFiles title="Templates" removePageSuffix={true}>
+          {
+            home ? <div id="drafts">
+              <SectionBox
+                cardBgColor="#1ABC9C"
+                title="drafts"
+                Card={TemplateCard}
+                cardItems={
+                  allTemplatesArray &&
+                  allTemplatesArray.length &&
+                  allTemplatesArray.filter(
+                    (item) =>
+                      item.created_by === userDetail?.portfolio_info[0].username
+                  )
+                }
+                status={allTemplatesStatus}
+                itemType={"templates"}
+              />
+            </div> : <></>
+          }
+          {
+            showOnlySaved ? <div id="saved-templates">
+              <SectionBox
+                cardBgColor="#1ABC9C"
+                title="saved templates"
+                Card={TemplateCard}
+                cardItems={allTemplatesArray}
+                status={allTemplatesStatus}
+                itemType={"templates"}
+              />
+            </div> : <></>
+          }
         </ManageFiles>
       </div>
     </WorkflowLayout>

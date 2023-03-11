@@ -10,11 +10,11 @@ export const startNewProcess = async (data) => {
 }
 
 export const verifyProcess = async (data) => {
-    return await httpProcess.post("verify-process/", data);
+    return await newHttpProcess.post("action/verify/", data);
 }
 
 export const getProcessLink = async (data) => {
-    return await httpProcess.post("verification-link/", data);
+    return await httpProcess.post("verification/link/", data);
 }
 
 export const startNewProcessV2 = async (data) => {
@@ -26,7 +26,7 @@ export const getSingleProcessV2 = async (processId) => {
 }
 
 export const getAllProcessesV2 = async (companyId) => {
-    return await newHttpProcess.get(`/org/${companyId}/`);
+    return await httpProcess.get(`/org/${companyId}/`);
 }
 
 export const verifyProcessV2 = async (data) => {
@@ -67,3 +67,12 @@ export const newProcessActionOptions = {
     startDocumentProcessingContentWise: "start_document_processing_content_wise",
     closeProcessingAndMarkCompleted: "close_processing_and_mark_as_completed",
 }
+
+export const processActionOptionsWithLinkReturned = [
+    "test_document_processing_wf_wise",
+    "test_document_processing_wf_steps_wise",
+    "test_document_processing_content_wise",
+    "start_document_processing_wf_wise",
+    "start_document_processing_wf_steps_wise",
+    "start_document_processing_content_wise",
+]

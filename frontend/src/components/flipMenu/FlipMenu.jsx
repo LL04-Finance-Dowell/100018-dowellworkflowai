@@ -1,6 +1,7 @@
 import Flip from "../flip/Flip";
 import styles from "./flipMenu.module.css";
-import { FaRegBell } from "react-icons/fa";
+import { FaFileContract, FaRegBell } from "react-icons/fa";
+import { FcWorkflow } from "react-icons/fc";
 import { HiOutlineDocument } from "react-icons/hi";
 import { FaSearch } from "react-icons/fa";
 import { FaHeadSideVirus } from "react-icons/fa";
@@ -11,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import React from "react";
 import { createTemplate } from "../../features/template/asyncThunks";
+import { Tooltip } from "react-tooltip";
 
 const FlipMenu = () => {
   const [filpItemsToDisplay, setFlipItemsToDisplay] = useState(flipItems);
@@ -104,6 +106,9 @@ export const FlipBack = (props) => {
       navigate("/workflows/#newWorkflow");
       dispatch(setToggleManageFileForm(true));
     }
+    if (role === "search") {
+      navigate("/search")
+    }
   };
 
   return (
@@ -118,8 +123,10 @@ export const FlipBack = (props) => {
             onClick={() => handleClick(props.roles[index])}
             type="button"
             className={styles.flip__button}
+            id={buttonText.id}
           >
-            {buttonText}
+            {buttonIcons[index]}
+            <Tooltip anchorId={buttonText.id} content={buttonText.text} offset={0} />
           </button>
             })) :
         <button
@@ -129,7 +136,7 @@ export const FlipBack = (props) => {
         >
           {props.buttonText}
         </button>
-      }  
+      }
     </div>
   );
 };
@@ -149,9 +156,9 @@ export const flipItems = [
     frontBg: "#7A7A7A",
     text: "new",
     buttonTexts: [
-      "Document",
-      "Template",
-      "Workflow"
+      { id: uuidv4(), text: "Document" },
+      { id: uuidv4(), text: "Template" },
+      { id: uuidv4(), text: "Workflow" }
     ],
     roles: [
       "newDoc",
@@ -165,7 +172,7 @@ export const flipItems = [
     frontBg: "#61CE70",
     text: "search",
     buttonText: "search document",
-    role: "",
+    role: "search",
   },
   {
     id: uuidv4(),
@@ -176,3 +183,9 @@ export const flipItems = [
     role: "",
   },
 ];
+
+const buttonIcons = [
+  <HiOutlineDocument />,
+  <FaFileContract />,
+  <FcWorkflow />,   
+]

@@ -16,9 +16,10 @@ const CopiesOfDoc = ({ currentStepIndex }) => {
     formState: { isSubmitSuccessful },
   } = useForm();
   const [loading, setLoading] = useState(false);
-  const { currentDocToWfs, docCurrentWorkflow } = useSelector(state => state.app);
+  const { currentDocToWfs, docCurrentWorkflow, processSteps, publicMembersSelectedForProcess, userMembersSelectedForProcess, teamMembersSelectedForProcess } = useSelector(state => state.app);
   const [ copiesFeaturesSet, setCopiesFeaturesSet ] = useState(false);
   const [ copiesFeaturesToDisplay, setCopiesFeaturesToDisplay ] = useState([]);
+  const [ copiesSelected, setCopiesSelected ] = useState([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -29,8 +30,9 @@ const CopiesOfDoc = ({ currentStepIndex }) => {
 
     const currentCopies = copiesFeaturesToDisplay.slice()
     const singleCopyOfCurrentDocument = {
-      id: uuidv4(), 
-      feature: currentDocToWfs?.document_name
+      id: currentDocToWfs?._id, 
+      feature: currentDocToWfs?.document_name,
+      document_number: 1,
     }
     currentCopies.push(singleCopyOfCurrentDocument);
 
@@ -39,16 +41,57 @@ const CopiesOfDoc = ({ currentStepIndex }) => {
 
   }, [currentDocToWfs])
 
+  useEffect(() => {
+
+    if (!currentDocToWfs) return
+
+    const newCopiesForCurrentStep= [];
+
+    const previousStepDetails = processSteps.find(process => process.workflow === docCurrentWorkflow._id)?.steps[currentStepIndex - 1];
+
+    if (previousStepDetails && previousStepDetails.stepTaskType && previousStepDetails.stepTaskType === "request_for_task") {
+      const totalNumberOfAssignedUsersInPreviousStep = 
+        publicMembersSelectedForProcess.filter(selectedUser => selectedUser.stepIndex === currentStepIndex - 1).length + 
+        teamMembersSelectedForProcess.filter(selectedUser => selectedUser.stepIndex === currentStepIndex - 1).length + 
+        userMembersSelectedForProcess.filter(selectedUser => selectedUser.stepIndex === currentStepIndex - 1).length
+      for (let i = 0; i < totalNumberOfAssignedUsersInPreviousStep; i++) newCopiesForCurrentStep.push({
+        id: currentDocToWfs?._id, 
+        feature: currentDocToWfs?.document_name,
+        document_number: i + 1,
+      });
+      setCopiesFeaturesToDisplay(newCopiesForCurrentStep);
+    } else {
+      newCopiesForCurrentStep.push({
+        id: currentDocToWfs?._id, 
+        feature: currentDocToWfs?.document_name,
+        document_number: 1,
+      });
+      setCopiesFeaturesToDisplay(newCopiesForCurrentStep);
+    }
+
+  }, [currentDocToWfs, processSteps])
+
   const onSubmit = (data) => {
     setLoading(true);
     console.log("documentCopies", data);
     dispatch(updateSingleProcessStep({
-      stepCloneCount: copiesFeaturesToDisplay.length,
+      stepCloneCount: copiesSelected.length,
       workflow: docCurrentWorkflow._id,
       indexToUpdate: currentStepIndex,
     }))
-    setTimeout(() => setLoading(false), 2000);
+    setTimeout(() => setLoading(false), 1000);
   };
+
+  const handleSingleCopySelection = (item) => {
+    const currentCopiesSelected = copiesSelected.slice();
+
+    const copyAlreadyAdded = currentCopiesSelected.find(copy => copy.id === item.id && copy.document_number === item.document_number);
+
+    if (copyAlreadyAdded) return setCopiesSelected(prevCopies => { return prevCopies.filter(copy => copy.document_number !== item.document_number) })
+
+    currentCopiesSelected.push(item);
+    setCopiesSelected(currentCopiesSelected);
+  }
 
   return (
     <FormLayout isSubmitted={isSubmitSuccessful} loading={loading}>
@@ -61,9 +104,10 @@ const CopiesOfDoc = ({ currentStepIndex }) => {
           {...register("taskFeature")}
           size={taskFeatures.length}
           className={globalStyles.task__features}
+          onChange={({ target }) => handleSingleCopySelection(JSON.parse(target.value))}
         >
           {copiesFeaturesToDisplay.map((item) => (
-            <option className={globalStyles.task__features__text} key={item.id}>
+            <option className={globalStyles.task__features__text} style={copiesSelected.find(copy => copy.id === item.id && copy.document_number === item.document_number) ? { backgroundColor: '#0048ff', color: '#fff' }: {}} key={item.id} value={JSON.stringify(item)}>
               {item.feature}
             </option>
           ))}

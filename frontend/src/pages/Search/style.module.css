@@ -1,0 +1,84 @@
+.search__Manage__Files__Content{
+    gap: 20px;
+}
+
+.search__box {
+    display: flex;
+    flex-direction: row;
+    margin: 6px auto;
+    padding: 7px;
+    gap: 10px;
+    position: relative;
+    border: 1px solid var(--e-global-color-0363588);
+    justify-content: space-between;
+    width: 60%;
+    border-radius: 10px;
+}
+
+.search__box input {
+    flex: 90%;
+    outline: none;
+}
+
+.search__box button {
+    flex: 10%;
+    background: none;
+    color: var(--e-global-color-accent);
+}
+
+.minified__Search__Container {
+    width: 100%;
+}
+
+.minified__Search__Container button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 10px auto;
+    gap: 10px;
+    justify-content: flex-start;
+    padding: 2% 3%;
+}
+
+.minified__Search__Container button:hover {
+    background-color: var(--e-global-color-0363588);
+}
+
+.minified__Search__Container button span.search__Item__Info {
+    border-radius: 15px;
+    padding: 3px 10px;
+    color: var(--e-global-color-cd6593d);
+}
+
+.minified__Search__Container button span.search__Item__Doc {
+    background-color: var(--e-global-color-accent);
+}
+
+.minified__Search__Container button span.search__Item__Temp {
+    background-color: var(--e-global-color-62c33d9);
+}
+
+.minified__Search__Container button span.search__Item__Workf {
+    background-color: var(--e-global-color-1342d1f);
+}
+
+.minified__Search__Container p {
+    text-align: center;
+    margin: 12px 0 20px;
+}
+
+.mini__Select__Row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.mini__Select__Row label {
+    cursor: pointer;
+}
+
+.mini__Select__Row label input {
+    margin-right: 0.5rem;
+}

@@ -33,6 +33,7 @@ const ManageFile = () => {
   const { allDocuments: allDocumentsArray, allDocumentsStatus } = useSelector(
     (state) => state.document
   );
+  const { allProcesses } = useSelector((state) => state.app);
 
   const [test, setTest] = useState(manageFileItems);
 
@@ -80,12 +81,14 @@ const ManageFile = () => {
           : item.parent.includes("Processes")
           ? {
               ...item,
-              count: "000",
+              count: allProcesses.length > 0 ? 
+                allProcesses.length
+              : "000",
             }
           : item
       )
     );
-  }, [allDocumentsArray, allTemplatesArray, allWorkflowsArray]);
+  }, [allDocumentsArray, allTemplatesArray, allWorkflowsArray, allProcesses]);
 
   return (
     <div className={sidebarStyles.feature__box}>
@@ -106,7 +109,7 @@ export const manageFileItems = [
       {
         id: uuidv4(),
         child: "saved documents",
-        href: "/documents/#saved-documents",
+        href: "/documents/saved",
       },
       /*   { id: uuidv4(), child: "Waiting to Process", href: "#" }, */
     ],
@@ -119,7 +122,7 @@ export const manageFileItems = [
       {
         id: uuidv4(),
         child: "saved templates",
-        href: "/templates/#saved-templates",
+        href: "/templates/saved",
       },
     ],
   },
@@ -131,13 +134,13 @@ export const manageFileItems = [
       {
         id: uuidv4(),
         child: "saved workflows",
-        href: "/workflows/#saved-workflows",
+        href: "/workflows/saved",
       },
-      {
-        id: uuidv4(),
-        child: "Waiting to Process",
-        href: "/workflows/set-workflow",
-      },
+      // {
+      //   id: uuidv4(),
+      //   child: "Waiting to Process",
+      //   href: "/workflows/set-workflow",
+      // },
     ],
   },
   {
@@ -148,13 +151,23 @@ export const manageFileItems = [
       {
         id: uuidv4(),
         child: "saved processes",
-        href: "/processes/#saved-processes",
+        href: "/processes/saved",
       },
       {
         id: uuidv4(),
-        child: "Waiting to Process",
-        href: "/workflows/new-set-workflow",
+        child: "paused processes",
+        href: "/processes/paused",
       },
+      {
+        id: uuidv4(),
+        child: "cancelled processes",
+        href: "/processes/cancelled",
+      },
+      // {
+      //   id: uuidv4(),
+      //   child: "Waiting to Process",
+      //   href: "/workflows/new-set-workflow",
+      // },
     ],
   },
 ];

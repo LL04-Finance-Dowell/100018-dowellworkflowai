@@ -15,14 +15,14 @@ export const dowellLogoutUrl =
   "/workflowai.online/%23";
 
 export const httpWorkflow = axios.create({
-  baseURL: api_url + "/workflows/",
+  baseURL: api_url + "workflows",
 });
 
 export const httpApiUrl = axios.create({ baseURL: api_url });
 
-export const httpTemplate = axios.create({ baseURL: api_url + "templates/" });
+export const httpTemplate = axios.create({ baseURL: api_url + "templates" });
 
-export const httpDocument = axios.create({ baseURL: api_url + "documents/" });
+export const httpDocument = axios.create({ baseURL: api_url + "documents" });
 
 export const httpAuth = axios.create({ baseURL: auth_url });
 
@@ -30,4 +30,12 @@ export const httpAuthOther = axios.create({ baseURL: auth_url_other });
 
 export const httpProcess = axios.create({ baseURL: api_url + "process" });
 
-export const newHttpProcess = axios.create({ baseURL: new_process_api_url + "process"});
+export const newHttpProcess = axios.create({
+  baseURL: new_process_api_url + "process",
+});
+
+export const searchHttpInstance = axios.create({ baseURL: api_url + "search" });
+
+export const httpFovorites = axios.create({ baseURL: api_url + "favorites" });
+
+export const httpFovorite = axios.create({ baseURL: new_process_api_url });

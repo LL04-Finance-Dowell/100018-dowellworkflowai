@@ -11,7 +11,7 @@
   width: 100%;
   padding: 10px;
   z-index: 1000;
-  width: 100%;
+  width: min(72.768vw, 835px) !important;
   white-space: nowrap;
 }
 .header__box {

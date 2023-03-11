@@ -8,8 +8,10 @@ import AssignButton from "../../assignButton/AssignButton";
 import { PrimaryButton } from "../../../styledComponents/styledComponents";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { newProcessActionOptions, startNewProcessV2 } from "../../../../services/processServices";
+import { newProcessActionOptions, processActionOptionsWithLinkReturned, startNewProcessV2 } from "../../../../services/processServices";
 import ProgressBar from "../../../progressBar/ProgressBar";
+import { AiOutlineClose } from "react-icons/ai";
+import React from "react";
 
 const ProcessDocument = () => {
   const [currentProcess, setCurrentProcess] = useState();
@@ -34,6 +36,10 @@ const ProcessDocument = () => {
   const { currentDocToWfs, selectedWorkflowsToDoc, processSteps, docCurrentWorkflow, tableOfContentForStep, teamMembersSelectedForProcess, userMembersSelectedForProcess, publicMembersSelectedForProcess } = useSelector((state) => state.app);
   const [ newProcessLoading, setNewProcessLoading ] = useState(false);
   const [ newProcessLoaded, setNewProcessLoaded ] = useState(null);
+  const [ showGeneratedLinksPopup, setShowGeneratedLinksPopup ] = useState(false);
+  const [ generatedLinks, setGeneratedLinks ] = useState(null)
+  const [ copiedLinks, setCopiedLinks ] = useState([]);
+
   const dispatch = useDispatch();
 
   const onSubmit = (data) => {
@@ -46,6 +52,7 @@ const ProcessDocument = () => {
     const processObj = {
       "company_id": userDetail?.portfolio_info[0]?.org_id,
       "created_by": userDetail?.userinfo?.username,
+      "creator_portfolio": userDetail?.portfolio_info[0]?.portfolio_name,
       "data_type": userDetail?.portfolio_info[0].data_type,
       "parent_document_id": currentDocToWfs?._id,
       "action": actionVal,
@@ -65,6 +72,9 @@ const ProcessDocument = () => {
       if (copyOfCurrentStep._id) delete copyOfCurrentStep._id;
       if (copyOfCurrentStep.toggleContent) delete copyOfCurrentStep.toggleContent;
       
+      copyOfCurrentStep.stepName = copyOfCurrentStep.step_name;
+      delete copyOfCurrentStep.step_name;
+
       copyOfCurrentStep.stepRole = copyOfCurrentStep.role;
       delete copyOfCurrentStep.role;
 
@@ -104,17 +114,18 @@ const ProcessDocument = () => {
     const requiredFieldKeys = Object.keys(requiredProcessStepsKeys);
 
     const pendingFieldsToFill = requiredFieldKeys.map(requiredKey => {
-      return processObj.workflows[0].workflows.steps.every(step => step[`${requiredKey}`])
+      if (processObj.workflows[0].workflows.steps.every(step => step[`${requiredKey}`])) return null
+      return "field missing"
     })
 
-    if (!pendingFieldsToFill.find(field => field === false)) return { error: `Please make sure you ${requiredProcessStepsKeys[requiredFieldKeys[pendingFieldsToFill.findIndex(field => field === false)]]} for each step` }
+    if (pendingFieldsToFill.find(field => field === "field missing")) return { error: `Please make sure you ${requiredProcessStepsKeys[requiredFieldKeys[pendingFieldsToFill.findIndex(field => field === "field missing")]]} for each step` }
 
     const membersMissingInStep = processObj.workflows[0].workflows.steps.map(step => {
       if ((step.stepPublicMembers.length < 1) && (step.stepTeamMembers.length < 1) && (step.stepUserMembers.length < 1)) return "Please assign at least one user for each step";
       return null
     })
 
-    if (membersMissingInStep.find(member => !null)) return { error: membersMissingInStep.find(member => !null) }
+    if (membersMissingInStep.find(member => member === "Please assign at least one user for each step")) return { error: membersMissingInStep.find(member => member === "Please assign at least one user for each step") }
 
     if (!processObj.workflows[0].workflows.steps.every(step => step.stepDocumentMap.length > 0)) return { error : "Please make sure you select at least one item from the table of contents for each step" };
     
@@ -130,6 +141,7 @@ const ProcessDocument = () => {
     if (processSteps.length < 1) return toast.info("You have not configured steps for any workflow");
     
     const processObjToPost = extractProcessObj(newProcessActionOptions[`${processOptionSelection}`]);
+    
     if (processObjToPost.error) return toast.info(processObjToPost.error)
     
     console.log("New process obj to post: ", processObjToPost)
@@ -140,6 +152,11 @@ const ProcessDocument = () => {
       console.log("process response: ", response);
       setNewProcessLoaded(true);
       setNewProcessLoading(false);
+      if (processActionOptionsWithLinkReturned.includes(newProcessActionOptions[`${processOptionSelection}`])) {
+        setGeneratedLinks(response);
+        setShowGeneratedLinksPopup(true);
+        return
+      }
       toast.success(typeof response === "string" ? response : "Successfully created new process");
     } catch (err) {
       console.log(err.response ? err.response.data : err.message);
@@ -147,8 +164,18 @@ const ProcessDocument = () => {
       toast.info(err.response ? err.response.status === 500 ? "New process creation failed" : err.response.data : "New process creation failed")
     }
   }
+  
+  const handleCopyLink = (link) => {
+    if (!link) return
+
+    navigator.clipboard.writeText(link);
+    const currentCopiedLinks  = copiedLinks.slice();
+    currentCopiedLinks.push(link);
+    setCopiedLinks(currentCopiedLinks);
+  }
 
   return (
+    <>
     <div className={styles.container}>
       <h2 className={`h2-small step-title align-left ${styles.header}`}>
         5. Process Document
@@ -161,12 +188,56 @@ const ProcessDocument = () => {
           <Select name="processOptionSelection" options={proccesses} takeActionValue={true} register={register} />
           { 
             newProcessLoading ? 
-            <ProgressBar durationInMS={10000} finalWidth={newProcessLoaded ? "100" : null} style={{ height: "40px" }} /> :
+            <ProgressBar durationInMS={18000} finalWidth={newProcessLoaded ? "100" : null} style={{ height: "40px" }} /> :
             <button hoverBg="success" onClick={handleProcessBtnClick}>Save / Start Proccess</button>
           }
         </div>
       </div>
     </div>
+    {
+      showGeneratedLinksPopup && <div className={styles.process__Generated__Links__Overlay}>
+        <div className={styles.process__Generated__Links__Container}>
+          <div className={styles.process__Generated__Links__Container__Close__Icon} onClick={() => setShowGeneratedLinksPopup(false)}>
+            <AiOutlineClose />
+          </div>
+          <div className={styles.process__Links__Wrapper}>
+            <table>
+              <thead>
+                <tr>
+                  <td>S/No.</td>
+                  <td>Name</td>
+                  <td>Link</td>
+                  <td>QR Code</td>
+                  <td>Copy</td>
+                </tr>
+              </thead>
+              <tbody className={styles.process__Links__Container}>
+                {
+                  React.Children.toArray(generatedLinks?.links?.map((link, index) => {
+                    return <tr>
+                      <td>{index + 1}.</td>
+                      <td>{typeof link === "object" ? Object.keys(link)[0] : ""}</td>
+                      <td className={styles.single__Link} onClick={() => handleCopyLink(Object.values(link)[0])}>{typeof link === "object" ? Object.values(link)[0] : ""}</td>
+                      <td>
+                        {
+                          generatedLinks?.qrcodes[index] && typeof generatedLinks?.qrcodes[index] === "object" ? 
+                          <img src={Object.values(generatedLinks?.qrcodes[index])[0]} alt="qr code" /> :
+                          <>Qr code</>
+                        }
+                      </td>
+                      <td>
+                        <span className={styles.process__Generated__Links__Copy__Item} onClick={() => handleCopyLink(Object.values(link)[0])}>{typeof link === "object" && copiedLinks.includes(Object.values(link)[0]) ? "Copied" : "Copy"}</span>
+                      </td>
+                    </tr>
+                  }))
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+    </>
   );
 };
 
