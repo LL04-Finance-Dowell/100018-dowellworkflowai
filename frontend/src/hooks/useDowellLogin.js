@@ -20,6 +20,8 @@ export default function useDowellLogin() {
       // remove session_id and/or id from url
       window.history.replaceState({}, document.title, "/workflowai.online/");
 
+      sessionStorage.clear();
+      
       sessionStorage.setItem("session_id", session_id);
       dispatch(setSessionId(session_id));
       if (id || localId) {

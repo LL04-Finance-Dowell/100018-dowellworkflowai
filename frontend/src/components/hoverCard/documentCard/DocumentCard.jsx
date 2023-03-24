@@ -13,18 +13,23 @@ import {
 import { setEditorLink } from "../../../features/app/appSlice";
 import { timeZoneToCountryObj } from "../../../utils/timezonesObj";
 
-import { AiOutlineHeart } from "react-icons/ai";
+import { AiFillStar, AiOutlineHeart, AiOutlineStar } from "react-icons/ai";
 import { handleFavorites } from "../../../features/favorites/asyncThunks";
 import { useAppContext } from "../../../contexts/AppContext";
 import { MdFavorite } from "react-icons/md";
 import { addNewFavoriteForUser, deleteFavoriteForUser } from "../../../services/favoritesServices";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { moveItemToArchive } from "../../../services/archiveServices";
+import { setAllDocuments } from "../../../features/document/documentSlice";
+import { BsBookmark, BsFillBookmarkFill } from "react-icons/bs";
 
-const DocumentCard = ({ cardItem, title }) => {
+const DocumentCard = ({ cardItem, title, hideFavoriteIcon, hideDeleteIcon }) => {
   const dispatch = useDispatch();
   const [dataLoading, setDataLoading] = useState(false);
   const { userDetail } = useSelector((state) => state.auth);
   const { singleFavorite } = useSelector((state) => state.favorites);
   const { favoriteItems, addToFavoritesState, removeFromFavoritesState } = useAppContext();
+  const { allDocuments } = useSelector(state => state.document);
 
   const handleFavoritess = async (item, actionType) => {
     /*  const data = {
@@ -34,12 +39,21 @@ const DocumentCard = ({ cardItem, title }) => {
     dispatch(handleFavorites(data)); */
 
     if (actionType === "add") {
-      addToFavoritesState("documents", item)
+      addToFavoritesState("documents", {...item, 'favourited_by': userDetail?.userinfo?.username})
       try {
-        const response = await addNewFavoriteForUser(item._id, 'document');
-        console.log(response)
+        const data = {
+          item: {
+            _id: item._id,
+            company_id: item.company_id,
+            document_name: item.document_name,
+          },
+          item_type: "document",
+          username: userDetail?.userinfo?.username,
+        }
+        const response = await (await addNewFavoriteForUser(data)).data;
+        toast.success(response)
       } catch (error) {
-        toast.info("Failed to add document to favorites")
+        toast.info("Failed to add document to bookmarks")
         removeFromFavoritesState("documents", item._id)
       }
     }
@@ -47,15 +61,36 @@ const DocumentCard = ({ cardItem, title }) => {
     if (actionType === "remove") {
       removeFromFavoritesState("documents", item._id)
       try {
-        const response = await deleteFavoriteForUser(item._id, 'document');
-        console.log(response)
+        const response = await (await deleteFavoriteForUser(item._id, 'document', userDetail?.userinfo?.username)).data;
+        toast.success('Item removed from bookmarks')
       } catch (error) {
-        toast.info("Failed to remove document from favorites")
-        removeFromFavoritesState("documents", item._id)
+        toast.info("Failed to remove document from bookmarks")
+        addToFavoritesState("documents", {...item, 'favourited_by': userDetail?.userinfo?.username})
       }
     }
     // console.log(favoriteItems)
   };
+
+  const handleTrashDocument = async (cardItem) => {
+    const copyOfAllDocuments = [...allDocuments];
+    const foundDocumentIndex = copyOfAllDocuments.findIndex(item => item._id === cardItem._id);
+    if (foundDocumentIndex === -1) return
+
+    const copyOfDocumentToUpdate = { ...copyOfAllDocuments[foundDocumentIndex] };
+    copyOfDocumentToUpdate.data_type = "Archive_Data";
+    copyOfAllDocuments[foundDocumentIndex] = copyOfDocumentToUpdate;
+    dispatch(setAllDocuments(copyOfAllDocuments));
+
+    try {
+      const response = await (await moveItemToArchive(cardItem._id, 'document')).data;
+      toast.success(response)
+    } catch (error) {
+      console.log(error.response ? error.response.data : error.message);
+      copyOfDocumentToUpdate.data_type = "Real_Data";
+      copyOfAllDocuments[foundDocumentIndex] = copyOfDocumentToUpdate;
+      dispatch(setAllDocuments(copyOfAllDocuments));
+    }
+  }
 
   const handleDetailDocumnet = async (item) => {
     if (dataLoading) return;
@@ -151,7 +186,7 @@ const DocumentCard = ({ cardItem, title }) => {
   const BackSide = () => {
     return (
       <div>
-        {/* <div style={{ 
+        {!hideFavoriteIcon && <div style={{ 
           cursor: "pointer", 
           position: "absolute", 
           right: "0", 
@@ -159,10 +194,10 @@ const DocumentCard = ({ cardItem, title }) => {
         }} onClick={() => handleFavoritess(cardItem, favoriteItems.documents.find(item => item._id === cardItem._id) ? "remove" : "add")}>
           {
             favoriteItems.documents.find(item => item._id === cardItem._id) ?
-            <MdFavorite /> :
-            <AiOutlineHeart />
+            <BsFillBookmarkFill /> :
+            <BsBookmark />
           }
-        </div> */}
+        </div>}
         {cardItem._id ? (
           <Button onClick={() => handleDetailDocumnet(cardItem)}>
             {dataLoading ? (
@@ -176,6 +211,14 @@ const DocumentCard = ({ cardItem, title }) => {
         ) : (
           "no item"
         )}
+        {!hideDeleteIcon && <div style={{ 
+          cursor: "pointer", 
+          position: "absolute", 
+          right: "0", 
+          bottom: "0"
+        }} onClick={() => handleTrashDocument(cardItem)}>
+          <RiDeleteBin6Line color="red" />
+        </div>}
       </div>
     );
   };

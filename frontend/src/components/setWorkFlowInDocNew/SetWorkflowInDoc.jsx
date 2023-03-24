@@ -14,11 +14,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { resetSetWorkflows, setContinents, setContinentsLoaded } from "../../features/app/appSlice";
 import { setContentOfDocument } from "../../features/document/documentSlice";
 import { getContinents } from "../../services/locationServices";
+import { useSearchParams } from "react-router-dom";
+import { getSingleProcessV2 } from "../../services/processServices";
 
 const SetWorkflowInDoc = () => {
   const dispatch = useDispatch();
   const { userDetail, session_id } = useSelector(state => state.auth);
-  const { continentsLoaded } = useSelector(state => state.app);
+  const { continentsLoaded, allProcesses } = useSelector(state => state.app);
+  const [ searchParams, setSearchParams ] = useSearchParams();
 
   useEffect(() => {
     dispatch(resetSetWorkflows());
@@ -41,6 +44,25 @@ const SetWorkflowInDoc = () => {
     })
 
   }, []);
+
+  useEffect(() => {
+    const processId = searchParams.get('id');
+    const processState = searchParams.get('state');
+
+    if (!processId || !processState) return
+    
+    if (processState !== 'draft') return
+
+    const foundProcess = allProcesses.find(process => process._id === processId);
+    if (!foundProcess) return
+
+    // getSingleProcessV2(foundProcess._id).then(res => {
+    //   console.log(res.data)
+    // }).catch(err => {
+    //   console.log(err.response ? err.response.data : err.message)
+    // })
+
+  }, [searchParams, allProcesses])
 
   return (
     <WorkflowLayout>

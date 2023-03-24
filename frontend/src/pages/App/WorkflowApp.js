@@ -101,14 +101,17 @@ const WorkflowApp = () => {
     if (!favoriteItemsLoaded) {
       const dataToPost = {
         "company_id": userDetail?.portfolio_info[0]?.org_id,
-        "created_by": userDetail?.userinfo?.username,
+        "username": userDetail?.userinfo?.username,
       }
   
-      getFavoritesForUser(dataToPost).then(res => {
+      getFavoritesForUser(dataToPost.company_id).then(res => {
+        // console.log(res.data)
         setFavoriteitems(res.data);
         setFavoriteitemsLoaded(true)
       }).catch(err => {
+        console.log(err.response ? err.response.data : err.message);
         console.log("Failed to fetch favorites")
+        // setFavoriteitemsLoaded(true)
       })
     }
 
@@ -189,6 +192,9 @@ const WorkflowApp = () => {
                     cardItems={item.items}
                     cardBgColor={item.cardBgColor}
                     idKey={item.id ? item.id : null}
+                    hideFavoriteIcon={true}
+                    itemType={"notifications"}
+                    hideDeleteIcon={true}
                   />
                 </div>
               ))
@@ -204,41 +210,41 @@ const WorkflowApp = () => {
           <div style={{ marginBottom: "45px" }}>
             <>
               {
-                // !favoriteItemsLoaded ? <p>Loading favorites...</p> : 
-                // <>
-                // {
-                //   React.Children.toArray(Object.keys(favoriteItems).map(key => {
-                //     if (key === "documents" && favoriteItems[key].length > 0) return <div>
-                //       <SectionBox
-                //         cardBgColor="#1ABC9C"
-                //         title="favorite documents"
-                //         Card={DocumentCard}
-                //         cardItems={favoriteItems[key]}
-                //         status={favoriteItemsLoaded}
-                //       />
-                //     </div>
-                //     if (key === "templates" && favoriteItems[key].length > 0) return <div>
-                //       <SectionBox
-                //         cardBgColor="#1ABC9C"
-                //         title="favorite templates"
-                //         Card={TemplateCard}
-                //         cardItems={favoriteItems[key]}
-                //         status={favoriteItemsLoaded}
-                //       />
-                //     </div>
-                //     if (key === "workflows" && favoriteItems[key].length > 0) return <div>
-                //       <SectionBox
-                //         cardBgColor="#1ABC9C"
-                //         title="favorite workflows"
-                //         Card={WorkflowCard}
-                //         cardItems={favoriteItems[key]}
-                //         status={favoriteItemsLoaded}
-                //       />
-                //     </div>
-                //     return <></>
-                //   }))
-                // }
-                // </>
+                !favoriteItemsLoaded ? <p style={{ textAlign: "center" }}>Loading bookmarks...</p> : 
+                <>
+                {
+                  React.Children.toArray(Object.keys(favoriteItems).map(key => {
+                    if (key === "documents" && favoriteItems[key].filter(item => item.favourited_by === userDetail?.userinfo?.username).length > 0) return <div>
+                      <SectionBox
+                        cardBgColor="#1ABC9C"
+                        title="bookmarked documents"
+                        Card={DocumentCard}
+                        cardItems={favoriteItems[key].filter(item => item.favourited_by === userDetail?.userinfo?.username)}
+                        status={favoriteItemsLoaded}
+                      />
+                    </div>
+                    if (key === "templates" && favoriteItems[key].filter(item => item.favourited_by === userDetail?.userinfo?.username).length > 0) return <div>
+                      <SectionBox
+                        cardBgColor="#1ABC9C"
+                        title="bookmarked templates"
+                        Card={TemplateCard}
+                        cardItems={favoriteItems[key].filter(item => item.favourited_by === userDetail?.userinfo?.username)}
+                        status={favoriteItemsLoaded}
+                      />
+                    </div>
+                    if (key === "workflows" && favoriteItems[key].filter(item => item.favourited_by === userDetail?.userinfo?.username).length > 0) return <div>
+                      <SectionBox
+                        cardBgColor="#1ABC9C"
+                        title="bookmarked workflows"
+                        Card={WorkflowCard}
+                        cardItems={favoriteItems[key].filter(item => item.favourited_by === userDetail?.userinfo?.username)}
+                        status={favoriteItemsLoaded}
+                      />
+                    </div>
+                    return <></>
+                  }))
+                }
+                </>
               }
             </>
           </div>
@@ -250,9 +256,9 @@ const WorkflowApp = () => {
                   Skeleton={Skeleton}
                   src={item.src}
                   title="YouTube video player"
-                  frameborder="0"
+                  frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowfullscreen
+                  allowFullScreen
                 />
               </div>
             ))}

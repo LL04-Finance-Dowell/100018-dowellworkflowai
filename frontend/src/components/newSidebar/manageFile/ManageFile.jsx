@@ -111,6 +111,11 @@ export const manageFileItems = [
         child: "saved documents",
         href: "/documents/saved",
       },
+      // {
+      //   id: uuidv4(),
+      //   child: "trash documents",
+      //   href: "/documents/trash",
+      // },
       /*   { id: uuidv4(), child: "Waiting to Process", href: "#" }, */
     ],
   },
@@ -124,6 +129,11 @@ export const manageFileItems = [
         child: "saved templates",
         href: "/templates/saved",
       },
+      // {
+      //   id: uuidv4(),
+      //   child: "trash templates",
+      //   href: "/templates/trash",
+      // },
     ],
   },
   {
@@ -136,6 +146,11 @@ export const manageFileItems = [
         child: "saved workflows",
         href: "/workflows/saved",
       },
+      // {
+      //   id: uuidv4(),
+      //   child: "trash workflows",
+      //   href: "/workflows/trash",
+      // },
       // {
       //   id: uuidv4(),
       //   child: "Waiting to Process",
@@ -163,6 +178,11 @@ export const manageFileItems = [
         child: "cancelled processes",
         href: "/processes/cancelled",
       },
+      // {
+      //   id: uuidv4(),
+      //   child: "trash processes",
+      //   href: "/processes/trash",
+      // },
       // {
       //   id: uuidv4(),
       //   child: "Waiting to Process",
