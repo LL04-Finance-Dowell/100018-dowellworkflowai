@@ -62,6 +62,7 @@ const ProcessDocument = () => {
           steps: [],
         }
       }],
+      "workflows_ids": [docCurrentWorkflow._id], // this will be updated later to capture multiple workflows
     }
 
     const foundProcessSteps = processSteps.find(process => process.workflow === docCurrentWorkflow._id);

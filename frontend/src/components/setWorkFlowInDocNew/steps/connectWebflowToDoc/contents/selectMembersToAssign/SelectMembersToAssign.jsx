@@ -58,6 +58,7 @@ const SelectMembersToAssign = ({ currentStepIndex }) => {
               portfolio: member.portfolio_name,
             }
           })
+          if (!membersFound) return null
           return Object.assign({}, ...membersFound)
         }
         return {
@@ -66,7 +67,7 @@ const SelectMembersToAssign = ({ currentStepIndex }) => {
           member: member.username,
           portfolio: member.portfolio_name
         }
-      })
+      }).filter(member => member)
 
       return memberPortfolios;
     }
