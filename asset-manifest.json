@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/workflowai.online/static/css/main.17ba19cf.css",
-    "main.js": "/workflowai.online/static/js/main.ec77174c.js",
+    "main.css": "/workflowai.online/static/css/main.4f41cefd.css",
+    "main.js": "/workflowai.online/static/js/main.0df49452.js",
     "static/js/787.1c6699c6.chunk.js": "/workflowai.online/static/js/787.1c6699c6.chunk.js",
     "static/media/roboto-all-400-normal.woff": "/workflowai.online/static/media/roboto-all-400-normal.c5d001fa922fa66a147f.woff",
     "static/media/dowell.png": "/workflowai.online/static/media/dowell.8a8009315d4d4ec76338.png",
@@ -16,12 +16,12 @@
     "static/media/sliderOne.webp": "/workflowai.online/static/media/sliderOne.898d1eaa21bec9b2eaf4.webp",
     "index.html": "/workflowai.online/index.html",
     "static/media/roboto-greek-ext-400-normal.woff2": "/workflowai.online/static/media/roboto-greek-ext-400-normal.169619821ea93019d1bb.woff2",
-    "main.17ba19cf.css.map": "/workflowai.online/static/css/main.17ba19cf.css.map",
-    "main.ec77174c.js.map": "/workflowai.online/static/js/main.ec77174c.js.map",
+    "main.4f41cefd.css.map": "/workflowai.online/static/css/main.4f41cefd.css.map",
+    "main.0df49452.js.map": "/workflowai.online/static/js/main.0df49452.js.map",
     "787.1c6699c6.chunk.js.map": "/workflowai.online/static/js/787.1c6699c6.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.17ba19cf.css",
-    "static/js/main.ec77174c.js"
+    "static/css/main.4f41cefd.css",
+    "static/js/main.0df49452.js"
   ]
 }
