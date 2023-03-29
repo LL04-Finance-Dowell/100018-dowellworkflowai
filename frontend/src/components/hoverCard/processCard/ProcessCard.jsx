@@ -15,7 +15,7 @@ const ProcessCard = ({ cardItem, title }) => {
   const navigate = useNavigate();
 
   const handleProcessItemClick = async (item) => {
-    if (item.processing_state === "draft") navigate(`/workflows/new-set-workflow?id=${item._id}&state=${item.processing_state}`)
+    // if (item.processing_state === "draft") navigate(`/workflows/new-set-workflow?id=${item._id}&state=${item.processing_state}`)
   };
 
   const handleTrashProcess = async (cardItem) => {
