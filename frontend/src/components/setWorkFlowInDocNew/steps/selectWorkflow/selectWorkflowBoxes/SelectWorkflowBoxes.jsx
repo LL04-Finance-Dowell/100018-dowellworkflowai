@@ -28,7 +28,7 @@ import {
 } from "../../../../../features/workflow/asyncTHunks";
 import { toast } from "react-toastify";
 
-const InfoBoxes = () => {
+const InfoBoxes = ({ savedDoc }) => {
   const { register, watch } = useForm();
   const { workflow, team } = watch();
 
@@ -265,11 +265,11 @@ const InfoBoxes = () => {
 
   return (
     <div ref={ref} style={{ y: y }} className={styles.container}>
-      {compInfoBoxes?.map((infoBox) => (
-        <InfoBoxContainer key={infoBox.id} className={styles.box}>
+      {React.Children.toArray(compInfoBoxes?.map((infoBox) => (
+        <InfoBoxContainer className={styles.box}>
           <InfoTitleBox
-            style={{ pointerEvents: infoBox?.status === "pending" && "none" }}
-            onClick={currentDocToWfs ? () => handleTogleBox(infoBox.id) : () => toast.info("Please select a document first.")}
+            style={{ pointerEvents: infoBox?.status === "pending" && "none", cursor: savedDoc ? "not-allowed" : "initial" }}
+            onClick={currentDocToWfs ? savedDoc ? () => {} : () => handleTogleBox(infoBox.id) : () => toast.info("Please select a document first.")}
             /*  className={styles.title__box} */
           >
             {infoBox.status && infoBox.status === "pending" ? (
@@ -289,7 +289,7 @@ const InfoBoxes = () => {
             )}
           </InfoTitleBox>
 
-          <Collapse open={!infoBox.isOpen}>
+          <Collapse open={infoBox.isOpen}>
             <InfoContentContainer>
               <InfoSearchbar
                 placeholder="Search"
@@ -366,7 +366,7 @@ const InfoBoxes = () => {
             </InfoContentContainer>
           </Collapse>
         </InfoBoxContainer>
-      ))}
+      )))}
     </div>
   );
 };
@@ -378,18 +378,18 @@ export const infoBoxes = [
     id: uuidv4(),
     title: "workflow",
     contents: [],
-    isOpen: true,
+    isOpen: false,
   },
   {
     id: uuidv4(),
     title: "team",
     contents: [],
-    isOpen: true,
+    isOpen: false,
   },
   {
     id: uuidv4(),
     title: "user",
     contents: [],
-    isOpen: true,
+    isOpen: false,
   },
 ];
