@@ -128,7 +128,6 @@ const WorkflowLayout = ({ children }) => {
                   <SideBar />
                 </div>
                 <div className={styles.children__box}>
-                  <p className={styles.beta__Info__Text}>You are on the beta version of workflow.ai</p>
                   {children}
                 </div>
               </div>
