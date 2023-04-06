@@ -1,4 +1,4 @@
-import { httpFavourite } from "../httpCommon/httpCommon";
+import { httpApiUrl, httpFavourite } from "../httpCommon/httpCommon";
 
 export class FavoriteServices {
   addFavorite = (data) => {
@@ -11,7 +11,7 @@ export class FavoriteServices {
 }
 
 export const getFavoritesForUser = async (companyId) => {
-  return await httpFavourite.get(`/org/${companyId}/`);
+  return await httpApiUrl.get(`/companies/${companyId}/favourites/`);
 }
 
 export const addNewFavoriteForUser = async (data) => {
@@ -19,5 +19,5 @@ export const addNewFavoriteForUser = async (data) => {
 }
 
 export const deleteFavoriteForUser = async (itemId, itemType, loggedInUsername) => {
-  return await httpFavourite.delete(`/delete/${itemId}/${itemType}/${loggedInUsername}/`)
+  return await httpFavourite.delete(`/${itemId}/${itemType}/${loggedInUsername}/`)
 }

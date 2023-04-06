@@ -3,6 +3,7 @@ import { WorkflowServices } from "../../services/workflowServices";
 import { setCurrentWorkflow, setToggleManageFileForm } from "../app/appSlice";
 import { removeFromMinedWf } from "./workflowsSlice";
 import { v4 as uuidv4 } from "uuid";
+import { changeToTitleCase } from "../../utils/helpers";
 
 const workflowServices = new WorkflowServices();
 
@@ -13,9 +14,16 @@ const filterWorkflows = (workflows, thunkAPI) => {
     filteredWorkflows = workflows
       .filter(
         (item) =>
-          item.workflows.data_type &&
-          item.workflows.data_type ===
-            thunkAPI.getState().auth?.userDetail?.portfolio_info[0]?.data_type
+          (
+            item?.data_type &&
+              item?.data_type ===
+                thunkAPI.getState().auth?.userDetail?.portfolio_info[0]?.data_type  
+          ) || 
+          (
+            item.workflows.data_type &&
+              item.workflows.data_type ===
+                thunkAPI.getState().auth?.userDetail?.portfolio_info[0]?.data_type
+          )
       )
       .map((item) => ({
         ...item,
@@ -43,7 +51,7 @@ export const createWorkflow = createAsyncThunk(
 
       console.log("resssssss1", res.data);
 
-      notify(res.data.workflow.workflows.workflow_title);
+      typeof res.data === 'string' && notify(changeToTitleCase(res.data));
 
       handleAfterCreated();
 
@@ -109,11 +117,12 @@ export const detailWorkflow = createAsyncThunk(
 
 export const updateWorkflow = createAsyncThunk(
   "workflow/update",
-  async ({ updateData, handleAfterCreated }, thunkAPI) => {
+  async ({ updateData, notify, handleAfterCreated }, thunkAPI) => {
     try {
-      const res = await workflowServices.updateWorkflow(updateData);
+      const res = await workflowServices.updateWorkflow(updateData._id, updateData);
 
-      console.log("updateWorkflow", res.data.workflow);
+      console.log("updateWorkflow", res.data);
+      typeof res.data === 'string' && notify(changeToTitleCase(res.data));
 
       thunkAPI.dispatch(removeFromMinedWf(updateData.workflow_id));
 

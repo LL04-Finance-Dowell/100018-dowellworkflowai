@@ -32,9 +32,17 @@ import WorkflowAiSettings from "./components/workflowAiSettings/WorkflowAiSettin
 import VerificationPage from "./pages/Verification/VerificationPage";
 import ProccessPage from "./pages/Processes/AllProccessPage/ProcessesPage";
 import SearchPage from "./pages/Search/SearchPage";
+import ConstructionPage from "./pages/ConstructionPage/ConstructionPage";
 
 function App() {
   useDowellLogin();
+
+  // // USE ONLY WHEN APP IS BROKEN OR UNDERGOING MAJOR CHANGES
+  // return (
+  //   <Routes>
+  //     <Route path="*" element={<ConstructionPage />} />
+  //   </Routes>
+  // )
 
   return (
     <Routes>
