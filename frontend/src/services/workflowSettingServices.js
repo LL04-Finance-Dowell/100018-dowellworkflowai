@@ -1,8 +1,8 @@
-import { httpApiUrl } from "../httpCommon/httpCommon";
+import { httpApiUrl } from '../httpCommon/httpCommon';
 
 export class WorkflowSettingServices {
   createWorkflowSettings = (data) => {
-    return httpApiUrl.post("workflow_ai_setting/", data);
+    return httpApiUrl.post('workflow_ai_setting/', data);
   };
 
   getWorkflowSettings = (wfSettingId) => {
@@ -12,4 +12,12 @@ export class WorkflowSettingServices {
   updateWorkflowSettings = (wfSettingId, data) => {
     return httpApiUrl.put(`workflow-settings/${wfSettingId}/`, data);
   };
+
+  createWorkflowTeam = (data) => {
+    return httpApiUrl.post('teams/', data);
+  };
+
+  getAllTeams = (companyId) => {
+    return httpApiUrl.get(`companies/${companyId}/teams/`)
+  }
 }

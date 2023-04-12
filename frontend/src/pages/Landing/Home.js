@@ -14,7 +14,7 @@ const LandingPage = () => {
   /* const [currentUser, setCurrentUser] = useState(null);
   const [userDetail, setUserDetail] = useState(null); */
 
-  /* https://ll04-finance-dowell.github.io/workflowai.online */
+  /* https://ll04-finance-dowell.github.io/100018-dowellWorkflowAi-testing */
 
   /*  useEffect(() => {
     const currentUser = localStorageGetItem("workFlowUser");
