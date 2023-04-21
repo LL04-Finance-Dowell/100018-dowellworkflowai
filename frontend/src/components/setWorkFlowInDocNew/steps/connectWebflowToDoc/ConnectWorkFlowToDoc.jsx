@@ -231,7 +231,7 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated }) => {
                         <div className={styles.checkbox}>
                           <input
                             {...register("skip")}
-                            id="skip"
+                            id={"skip-" + index}
                             type="checkbox"
                             onChange={(e) =>
                               handleSkipSelection(
@@ -252,12 +252,12 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated }) => {
                               )?.steps[index]?.skipStep
                             }
                           />
-                          <label htmlFor="skip">Skip this Step</label>
+                          <label htmlFor={"skip-" + index}>Skip this Step</label>
                         </div>
                         <div className={styles.checkbox}>
                           <input
                             {...register("permit")}
-                            id="permit"
+                            id={"permit-" + index}
                             type="checkbox"
                             onChange={(e) => {
                               handlePermitInternalSelection(
@@ -284,7 +284,7 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated }) => {
                               )?.steps[index]?.permitInternalWorkflow
                             }
                           />
-                          <label htmlFor="permit">
+                          <label htmlFor={"permit-" + index}>
                             Permit internal workflow in this Step
                           </label>
                         </div>

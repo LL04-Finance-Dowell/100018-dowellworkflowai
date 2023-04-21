@@ -8,6 +8,8 @@ import InfoBox from "../../../infoBox/InfoBox";
 import { useSelector } from "react-redux";
 import ProgressBar from "../../../progressBar/ProgressBar";
 import { toast } from "react-toastify";
+import React from "react";
+import { limitTaskTo, rights, taskType } from "../connectWebflowToDoc/contents/selectMembersToAssign/assignTask/AssignTask";
 
 const CheckErrors = () => {
   const {
@@ -17,20 +19,19 @@ const CheckErrors = () => {
     watch
   } = useForm();
   const [loading, setLoading] = useState(false);
-  const [ processTableInfo, setProcessTableInfo ] = useState({
-    workflowWise: [],
-    memberWise: [],
-    contentWise: [],
-    workflowStepWise: [],
-    locationWise: [],
-    timeWise: []
-
-  });
-  const { docCurrentWorkflow, selectedWorkflowsToDoc, processSteps } = useSelector(state => state.app);
+  const { 
+    docCurrentWorkflow, 
+    selectedWorkflowsToDoc, 
+    processSteps, 
+    teamMembersSelectedForProcess, 
+    userMembersSelectedForProcess, 
+    publicMembersSelectedForProcess,
+  } = useSelector(state => state.app);
   const [ workflowItemsToDisplay, setWorkflowItemsToDisplay ] = useState([])
   const [ sortItemActive, setSortItemActive ] = useState(null);
   const [ sortLoading, setSortLoading ] = useState(false);
   const { processOption } = watch();
+  const [ copyOfWorkflowItemsToDisplay, setCopyOfWorkflowItemsToDisplay ] = useState([]);
 
   const onSubmit = (data) => {
     setLoading(true);
@@ -51,10 +52,43 @@ const CheckErrors = () => {
       
       copyOfNestedWorkflowObjWithSteps.steps = foundProcessSteps ? foundProcessSteps.steps.map((step, currentIndex) => {
         let copyOfCurrentStep = { ...step };
-        if (copyOfCurrentStep._id) delete copyOfCurrentStep._id;
         if (copyOfCurrentStep.toggleContent) delete copyOfCurrentStep.toggleContent;
-        copyOfCurrentStep.document_map = tableOfContents.filter(content => content.stepIndex === currentIndex).map(content => content.id)
         if (copyOfCurrentStep.stepRights === "add_edit") copyOfCurrentStep.stepRightsToDisplay = "Add/Edit"
+        if (!copyOfCurrentStep.stepLocation) copyOfCurrentStep.stepLocation = "any"
+
+        copyOfCurrentStep.stepName = copyOfCurrentStep.step_name;
+        delete copyOfCurrentStep.step_name;
+
+        copyOfCurrentStep.stepRole = copyOfCurrentStep.role;
+        delete copyOfCurrentStep.role;
+
+        copyOfCurrentStep.stepPublicMembers = publicMembersSelectedForProcess.filter(selectedUser => selectedUser.stepIndex === currentIndex).map(user => {
+          const copyOfUserItem = { ...user }
+          if (Array.isArray(copyOfUserItem.member)) copyOfUserItem.member = copyOfUserItem.member[0];
+          delete copyOfUserItem.stepIndex;
+
+          return copyOfUserItem
+        })
+
+        copyOfCurrentStep.stepTeamMembers = teamMembersSelectedForProcess.filter(selectedUser => selectedUser.stepIndex === currentIndex).map(user => {
+          const copyOfUserItem = { ...user }
+          if (Array.isArray(copyOfUserItem.member)) copyOfUserItem.member = copyOfUserItem.member[0];
+          delete copyOfUserItem.stepIndex;
+
+          return copyOfUserItem
+        })
+
+        copyOfCurrentStep.stepUserMembers = userMembersSelectedForProcess.filter(selectedUser => selectedUser.stepIndex === currentIndex).map(user => {
+          const copyOfUserItem = { ...user }
+          if (Array.isArray(copyOfUserItem.member)) copyOfUserItem.member = copyOfUserItem.member[0];
+          delete copyOfUserItem.stepIndex;
+
+          return copyOfUserItem
+        })
+
+        copyOfCurrentStep.stepNumber = currentIndex + 1;
+        copyOfCurrentStep.stepDocumentMap = tableOfContents.filter(content => content.stepIndex === currentIndex).map(content => content.id);
+  
         return copyOfCurrentStep
       }) : [];
 
@@ -68,7 +102,7 @@ const CheckErrors = () => {
 
     setWorkflowItemsToDisplay(currentDataMapItem)
 
-  }, [docCurrentWorkflow, selectedWorkflowsToDoc, processSteps])
+  }, [docCurrentWorkflow, selectedWorkflowsToDoc, processSteps, publicMembersSelectedForProcess, teamMembersSelectedForProcess, userMembersSelectedForProcess])
 
   const handleSortProcess = () => {
     if (!docCurrentWorkflow) return toast.info("Please select a document");
@@ -81,16 +115,11 @@ const CheckErrors = () => {
       setSortItemActive(true)
     }, 2000);
 
-    switch (processOption) {
-      case null:
-      case "workflowWise":
-        console.log("sorting workflow wise")
-        return;
-    
-      default:
-        console.log("Invalid sort option passed")
-        return;
+    if (processOption === 'memberWise') {
+      console.log(teamMembersSelectedForProcess);
     }
+    // setCopyOfWorkflowItemsToDisplay([...structuredClone(workflowItemsToDisplay))
+    console.log(workflowItemsToDisplay);
   }
 
   return (
@@ -111,11 +140,14 @@ const CheckErrors = () => {
           {/* <PrimaryButton hoverBg="success">25%</PrimaryButton> */}
         </div>
         { sortItemActive ? <div className={styles.proccess__container}>
-          {workflowItemsToDisplay.map((item) => (
+          {React.Children.toArray(workflowItemsToDisplay.map((item) => (
             <div className={styles.proccess__box}>
               <div
                 className={styles.first__box}
-                style={{ backgroundColor: processOptions[0].color }}
+                style={{ 
+                  backgroundColor: !processOption || !colorsDictForOptionType[processOption] ? '#FFF3005E' : 
+                  colorsDictForOptionType[processOption] 
+                }}
               >
                 <h3 className={styles.box__header}>
                   {processOptions[0].selectItem.option}
@@ -124,21 +156,54 @@ const CheckErrors = () => {
                   {item.workflows.workflow_title}
                 </h3>
               </div>
-              {item.workflows.steps.map((step) => (
+              {React.Children.toArray(item.workflows.steps.map((step) => (
                 <div className={styles.box}>
                   <InfoBox
                     boxType="dark"
-                    title={item.workflows.workflow_title + "-" + step.step_name}
+                    title={item.workflows.workflow_title + "-" + step.stepName}
                     type="list"
-                    items={tableOfContents.map((item) => ({
-                      _id: item._id,
-                      content: item.id,
-                    }))}
+                    items={
+                      !processOption || processOption === 'workflowWise' ?
+                      item.workflows.steps.map((step) => ({
+                        _id: step._id,
+                        contentDisplay: true,
+                        displayNoContent: step.stepSkipped ? true : false,
+                        contentsToDisplay: [
+                          { 
+                            header: 'Members', 
+                            content: step.stepPublicMembers.map(m => m.member).join(", ") +
+                              step.stepTeamMembers.map(m => m.member).join(", ") +
+                              step.stepPublicMembers.map(m => m.member).join(", ")
+                          },
+                          { 
+                            header: 'Task type', 
+                            content: step.stepTaskType ? taskType?.find(task => task.normalValue === step.stepTaskType)?.option : '',
+                          },
+                          { 
+                            header: 'Rights', 
+                            content: step.stepRights ? rights?.find(right => right.normalValue === step.stepRights)?.option : '',
+                          },
+                          { 
+                            header: 'Activity type', 
+                            content: step.stepTaskLimitation ? limitTaskTo?.find(option => option.normalValue === step.stepTaskLimitation)?.option : '',
+                          },
+                          { 
+                            header: 'Location', 
+                            content: step.stepLocation,
+                          },
+                          { 
+                            header: 'Time limit', 
+                            content: step?.stepTime,
+                          },
+                        ]
+                      })) :
+                      []
+                    }
                   />
                 </div>
-              ))}
+              )))}
             </div>
-          ))}
+          )))}
         </div> : <></>
         }
       </div>
@@ -147,6 +212,15 @@ const CheckErrors = () => {
 };
 
 export default CheckErrors;
+
+const colorsDictForOptionType = {
+  "workflowWise": "#FFF3005E",
+  "memberWise": "#61CE704A",
+  "contentWise": "#7A7A7A45",
+  "workflowStepWise": "#6EC1E45E",
+  "locationWise": "#FF000047",
+  "timeWise": "#0048FF26",
+}
 
 export const tableOfContents = [
   {

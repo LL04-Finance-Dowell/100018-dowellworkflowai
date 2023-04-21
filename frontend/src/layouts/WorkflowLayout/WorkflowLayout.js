@@ -6,6 +6,7 @@ import Editor from '../../components/editor/Editor';
 import { useEffect, useState } from 'react';
 import DowellLogo from '../../assets/dowell.png';
 import Spinner from '../../components/spinner/Spinner';
+import Chat from '../../components/Chat/Chat';
 import useCloseElementOnEscapekeyClick from '../../../src/hooks/useCloseElementOnEscapeKeyClick';
 import UserDetail from '../../components/newSidebar/userDetail/UserDetail';
 import {
@@ -94,11 +95,13 @@ const WorkflowLayout = ({ children }) => {
       // Fetching processes
       getAllProcessesV2(userDetail?.portfolio_info[0]?.org_id)
         .then((res) => {
-          dispatch(
-            setAllProcesses(
-              res.data.filter((process) => process.processing_state).reverse()
-            )
-          );
+          const savedProcessesInLocalStorage = JSON.parse(localStorage.getItem('user-saved-processes'));
+          if (savedProcessesInLocalStorage) {
+            const processes = [...savedProcessesInLocalStorage, ...res.data.filter(process => process.processing_state)].sort((a, b) => new Date(b?.created_at) - new Date(a?.created_at));
+            dispatch(setAllProcesses(processes));
+          } else {
+            dispatch(setAllProcesses(res.data.filter(process => process.processing_state).reverse()));
+          }
           dispatch(setProcessesLoading(false));
           dispatch(setProcessesLoaded(true));
         })
@@ -125,9 +128,7 @@ const WorkflowLayout = ({ children }) => {
     const workflowProduct = userDetail?.portfolio_info?.find(
       (item) => item.product === 'Workflow AI'
     );
-    if (!workflowProduct || workflowProduct.member_type !== 'owner') return;
-
-    if (adminUserPortfolioLoaded) return;
+    if (!workflowProduct || workflowProduct.member_type !== 'owner' || adminUserPortfolioLoaded) return;
 
     // admin user
     dispatch(setAdminUser(true));
@@ -223,6 +224,7 @@ const WorkflowLayout = ({ children }) => {
                 <div className={styles.children__box}>
                   {children}
                 </div>
+                  <Chat/>
               </div>
               <Editor />
             </>

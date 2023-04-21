@@ -11,6 +11,16 @@ export const formatDateAndTime = (dateTime) => {
 };
 
 export const setIsSelected = ({ items, item, boxId, title, type }) => {
+  // console.log(
+  //   'item: ',
+  //   item,
+  //   'bx id: ',
+  //   boxId,
+  //   'title: ',
+  //   title,
+  //   'type: ',
+  //   type
+  // );
   let isSelectedItems = [];
   const mainSetter = (modItems = items) => {
     return modItems.map((child) =>
@@ -38,11 +48,9 @@ export const setIsSelected = ({ items, item, boxId, title, type }) => {
   };
 
   if (type === 'checkbox') {
-    console.log('enter checky');
     isSelectedItems = mainSetter();
-  } else if (type === 'radio') {
-    console.log('enter rady');
-    // * Set isSelected for all radio options to false
+  } else if (type === 'radio' || type === 'unselect_all') {
+    // * Set 'isSelected' for all radio options and portfolio options for new teams to false
     const modItems = items.map((child) =>
       boxId === child._id
         ? {
@@ -59,7 +67,7 @@ export const setIsSelected = ({ items, item, boxId, title, type }) => {
         : child
     );
 
-    isSelectedItems = mainSetter(modItems);
+    isSelectedItems = type !== 'unselect_all' ? mainSetter(modItems) : modItems;
   }
   return isSelectedItems;
 };
