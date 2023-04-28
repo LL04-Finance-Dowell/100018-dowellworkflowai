@@ -19,9 +19,11 @@ import { getSingleProcessV2 } from "../../services/processServices";
 import Spinner from "../spinner/Spinner";
 import { contentDocument } from "../../features/document/asyncThunks";
 import ConstructionPage from "../../pages/ConstructionPage/ConstructionPage";
+import { useTranslation } from "react-i18next";
 
 const SetWorkflowInDoc = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const { userDetail, session_id } = useSelector(state => state.auth);
   const { continentsLoaded, allProcesses, processSteps } = useSelector(state => state.app);
   const [ searchParams, setSearchParams ] = useSearchParams();
@@ -31,6 +33,7 @@ const SetWorkflowInDoc = () => {
   const [ draftProcess, setDraftProcess ] = useState(null);
   const [ draftProcessDOc, setDraftProcessDoc ] = useState(null);
   const [ isDraftProcess, setIsDraftProcess ] = useState(false);
+  const [ draftProcessLoaded, setDraftProcessLoaded ] = useState(false);
 
   useEffect(() => {
     const processId = searchParams.get('id');
@@ -42,6 +45,7 @@ const SetWorkflowInDoc = () => {
       setDraftProcess(null);
       setDraftProcessDoc(null);
       setIsDraftProcess(false);
+      setDraftProcessLoaded(false);
     }
 
     if (continentsLoaded) return
@@ -76,6 +80,8 @@ const SetWorkflowInDoc = () => {
       return
     }
     
+    if (draftProcessLoaded) return
+    
     setDraftProcessLoading(true);
     setIsDraftProcess(true);
     
@@ -93,6 +99,7 @@ const SetWorkflowInDoc = () => {
 
     if (localStorageProcess) {
       populateProcessDetails(foundProcess);
+      setDraftProcessLoaded(true);
       return setDraftProcessLoading(false);
     }
 
@@ -100,13 +107,14 @@ const SetWorkflowInDoc = () => {
       const fetchedProcessData = res.data;
       populateProcessDetails(fetchedProcessData);
       setDraftProcessLoading(false);
-
+      setDraftProcessLoaded(true);
     }).catch(err => {
       console.log(err.response ? err.response.data : err.message);
       setDraftProcessLoading(false);
+      setDraftProcessLoaded(true);
     })
     
-  }, [searchParams, allProcesses, allDocuments, allWorkflows])
+  }, [searchParams, allProcesses, allDocuments, allWorkflows, draftProcessLoaded])
 
   const populateProcessDetails = (process) => {
     // console.log(process);
@@ -114,7 +122,7 @@ const SetWorkflowInDoc = () => {
     // console.log(foundOriginalDoc);
     if (!foundOriginalDoc) return;
 
-    setDraftProcess(process);
+    // setDraftProcess(process);
     dispatch(contentDocument(foundOriginalDoc._id));
     dispatch(setCurrentDocToWfs(foundOriginalDoc));
 
@@ -131,10 +139,6 @@ const SetWorkflowInDoc = () => {
       const stepKeys = Object.keys(step);
 
       stepKeys.forEach(key => {
-        // console.log(key)
-        if (key === 'stepName') dispatch(updateSingleProcessStep({ 'step_name': step[key], "indexToUpdate": currentStepIndex, "workflow": foundWorkflow._id }))
-        if (key === 'stepRole') dispatch(updateSingleProcessStep({ 'role': step[key], "indexToUpdate": currentStepIndex, "workflow": foundWorkflow._id }))
-        
         if (key === 'stepPublicMembers') {
           step[key].forEach(user => {
             // console.log(user)
@@ -165,18 +169,20 @@ const SetWorkflowInDoc = () => {
             dispatch(setTableOfContentForStep(newTableOfContentObj));
           })
         }
-
-        const newStepObj = {
-          [`${key}`]: step[key], 
-          "indexToUpdate": currentStepIndex, 
-          "workflow": foundWorkflow._id,
-        };
-
-        dispatch(updateSingleProcessStep(newStepObj));
       })
-    
-    })
+    });
 
+    const copyOfProcessObj = structuredClone(process);
+
+    // This logic would also be updated later when multiple workflows are configured in a process creation
+    const processStepsForWorkflow = [
+      {
+        workflow: foundWorkflow._id,
+        steps: process.process_steps
+      }
+    ]
+    copyOfProcessObj.savedProcessSteps = processStepsForWorkflow;
+    setDraftProcess(copyOfProcessObj);
     setDraftProcessDoc(foundOriginalDoc);
   }
 
@@ -194,7 +200,7 @@ const SetWorkflowInDoc = () => {
         <h2 className={`${styles.title} h2-large `}>
           {
            draftProcess ? draftProcess?.process_title :
-           'Set WorkFlows in Documents'
+           t('Set WorkFlows in Documents')
           }
         </h2>
         {
@@ -207,11 +213,11 @@ const SetWorkflowInDoc = () => {
               <div className={styles.diveder}></div>
               <SelectWorkflow savedDoc={draftProcessDOc} />
               <div className={styles.diveder}></div>
-              <ConnectWorkFlowToDoc stepsPopulated={true} />
+              <ConnectWorkFlowToDoc stepsPopulated={true} savedProcessSteps={draftProcess.savedProcessSteps ? draftProcess.savedProcessSteps : []} />
               <div className={styles.diveder}></div>
               <CheckErrors />
               <div className={styles.diveder}></div>
-              <ProcessDocument />
+              <ProcessDocument savedProcess={draftProcess} />
             </> 
             :
             <>

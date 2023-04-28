@@ -20,8 +20,11 @@ import { TiTick } from "react-icons/ti";
 import { MdModeEditOutline } from "react-icons/md";
 import { RiDeleteBinLine } from "react-icons/ri";
 import StepTable from "./stepTable/StepTable";
+import { useTranslation } from "react-i18next";
 
 const CreateWorkflows = ({ handleToggleOverlay }) => {
+  const { t } = useTranslation();
+
   const notify = (message) => toast.success(message);
 
   const stepNameRef = useRef(null);
@@ -157,7 +160,7 @@ const CreateWorkflows = ({ handleToggleOverlay }) => {
         <div className={styles.form__container}>
           <div className={overlayStyles.input__box}>
             <label>
-              Workflow Title <span>*</span>
+              {t("Workflow Title")} <span>*</span>
             </label>
             <input value={workflowTitle} onChange={handleWorkflowChange} />
           </div>
@@ -176,20 +179,20 @@ const CreateWorkflows = ({ handleToggleOverlay }) => {
               <>
                 <div className={overlayStyles.input__box}>
                   <label ref={stepNameRef} htmlFor="step_name">
-                    Step Name
+                    {t("Step Name")}
                   </label>
                   <input
                     required
-                    placeholder="Step Name"
+                    placeholder={t("Step Name")}
                     id="step_name"
                     {...register("step_name")}
                   />
                 </div>
                 <div className={overlayStyles.input__box}>
-                  <label htmlFor="role">Role</label>
+                  <label htmlFor="role">{t("Role")}</label>
                   <input
                     required
-                    placeholder="Role"
+                    placeholder={t("Role")}
                     id="role"
                     {...register("role")}
                   />
@@ -207,7 +210,7 @@ const CreateWorkflows = ({ handleToggleOverlay }) => {
               onClick={handleToggleOverlay}
               className={styles.cancel__button}
             >
-              cancel
+              {t("cancel")}
             </button>
             <SubmitButton
               onClick={handleCreateWorkflow}
@@ -216,7 +219,7 @@ const CreateWorkflows = ({ handleToggleOverlay }) => {
               className={styles.add__button}
               disabled={submitBtnDisabled}
             >
-              {currentWorkflow ? "update" : "save"}
+              {currentWorkflow ? t("update") : t("save")}
             </SubmitButton>
           </div>
         </div>

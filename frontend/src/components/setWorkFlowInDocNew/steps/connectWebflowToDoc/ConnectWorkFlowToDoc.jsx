@@ -19,10 +19,12 @@ import AssignDocumentMap from "./contents/assignDocumentMap/AssignDocumentMap";
 import SelectMembersToAssign from "./contents/selectMembersToAssign/SelectMembersToAssign";
 import AssignCollapse from "./contents/assignCollapse/AssignCollapse";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
-const ConnectWorkFlowToDoc = ({ stepsPopulated }) => {
+const ConnectWorkFlowToDoc = ({ stepsPopulated, savedProcessSteps }) => {
   const { register } = useForm();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const { contentOfDocument, contentOfDocumentStatus } = useSelector(
     (state) => state.document
@@ -38,15 +40,31 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated }) => {
   const [showSteps, setShowSteps] = useState([]);
 
   useEffect(() => {
-    if (stepsPopulated) return setCurrentSteps(stepsPopulated);
     setCurrentSteps(docCurrentWorkflow?.workflows?.steps);
-  }, [docCurrentWorkflow, stepsPopulated]);
+  }, [docCurrentWorkflow]);
 
   const [contentToggle, setContentToggle] = useState(false);
 
   // console.log("sssssssssssssssssss", wfToDocument);
 
   useEffect(() => {
+    if (stepsPopulated) {
+      dispatch(setProcessSteps(savedProcessSteps));
+      
+      // this will also be updated in the nearest future to capture multiple workflows
+      const enabledSavedSteps = savedProcessSteps[0]?.steps?.map((step, index) => {
+        if (step.stepPublicMembers.length > 0 || step.stepTeamMembers.length > 0 || step?.stepDocumentMap?.length > 0 || step?.stepRights?.length > 0) {
+          return {
+            _id: docCurrentWorkflow?.workflows?.steps[index]._id,
+            index: index,
+            enableStep: true
+          }
+        }
+        return null
+      }).filter(step => step);
+      setEnabledSteps(enabledSavedSteps);
+      return
+    }
     setCurrentSteps(
       docCurrentWorkflow ? docCurrentWorkflow?.workflows?.steps : []
     );
@@ -87,7 +105,7 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated }) => {
     stepsForWorkflow.push(stepsObj);
 
     dispatch(setProcessSteps(stepsForWorkflow));
-  }, [docCurrentWorkflow, stepsPopulated]);
+  }, [docCurrentWorkflow, stepsPopulated, savedProcessSteps]);
 
   const handleToggleContent = (id) => {
     setCurrentSteps((prev) =>
@@ -186,7 +204,7 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated }) => {
     <>
       <div className={styles.container}>
         <h2 className="h2-small step-title align-left">
-          3. Connect Selected Workflows to the selected Document
+          3. {t("Connect Selected Workflows to the selected Document")}
         </h2>
 
         {"contentOfDocumentStatus" === "pending" ? (
@@ -224,7 +242,7 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated }) => {
                         <div
                           className={`${styles.step__header} ${styles.title__box}`}
                         >
-                          {item.step_name}
+                          {item.step_name ? item.step_name : item.steps ? item.steps[index]?.stepName : ''}
                         </div>
                       </div>
                       <div>

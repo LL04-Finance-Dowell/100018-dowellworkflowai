@@ -28,9 +28,13 @@ import { updateUserDetail } from '../../features/auth/authSlice';
 import { getAllProcessesV2 } from '../../services/processServices';
 import { useAppContext } from '../../contexts/AppContext';
 import { WorkflowSettingServices } from '../../services/workflowSettingServices';
+import { useTranslation } from "react-i18next";
+import i18next from "i18next"
 
 const WorkflowLayout = ({ children }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+  // console.log({t})
   const { userDetail, session_id, id } = useSelector((state) => state.auth);
   const {
     userDetailPosition,
@@ -257,7 +261,7 @@ const WorkflowLayout = ({ children }) => {
               >
                 <AiOutlineClose />
               </div>
-              <h3>Agree to terms</h3>
+              <h3>{t("Agree to terms")}</h3>
               {legalStatusLoading ? (
                 <LoadingSpinner />
               ) : (
@@ -265,7 +269,7 @@ const WorkflowLayout = ({ children }) => {
                   {dateAgreedToLegalStatus &&
                     dateAgreedToLegalStatus.length > 1 && (
                       <span className={styles.date__Agreed}>
-                        You agreed on:{' '}
+                        {t("You agreed on")}:{' '}
                         {formatDateAndTime(dateAgreedToLegalStatus)}
                       </span>
                     )}
@@ -275,14 +279,14 @@ const WorkflowLayout = ({ children }) => {
                       type='checkbox'
                       onChange={handleAgreeCheckBoxClick}
                     />
-                    I agree with the privacy policy and terms and conditions
+                    {t("I agree with the privacy policy and terms and conditions")}
                   </label>
                   <button
                     disabled={!legalTermsAgreed}
                     className={`${styles.legal__Register__Btn} ${styles.continue__Btn}`}
                     onClick={() => dispatch(setShowLegalStatusPopup(false))}
                   >
-                    {'Continue'}
+                    {t("Continue")}
                   </button>
                   {legalArgeePageLoading ? (
                     <div className='loading__Spinner__New__Portfolio abs__Pos'>

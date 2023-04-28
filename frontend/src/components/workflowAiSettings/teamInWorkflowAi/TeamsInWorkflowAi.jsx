@@ -15,11 +15,15 @@ import { v4 } from 'uuid';
 import { WorkflowSettingServices } from '../../../services/workflowSettingServices';
 import { toast } from 'react-toastify';
 import { useAppContext } from '../../../contexts/AppContext';
+import Spinner from '../../spinner/Spinner';
+import { useTranslation } from "react-i18next";
 
 // TODO FIX ADDITION OF NEW TEAM TO 'workflowTeams' 132.
 const TeamsInWorkflowAi = () => {
   // *Populating of 'teamsInWorkflowAITeams' with fetched teams is done in 'infoBox.jsx'
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+
   const { register, handleSubmit } = useForm();
 
   const workflowSettingServices = new WorkflowSettingServices();
@@ -55,6 +59,7 @@ const TeamsInWorkflowAi = () => {
     rerun,
     setRerun,
     setSync,
+    isFetchingTeams,
   } = useAppContext();
   const [handleChangeParams, setHandleChangeParams] = useState([]);
   const [selectedTeamId, setSelectedTeamId] = useState('');
@@ -133,9 +138,12 @@ const TeamsInWorkflowAi = () => {
         const res = await workflowSettingServices.createWorkflowTeam(data);
         toast.success('Team created');
         setIsCreatingTeam(false);
-        // setWorkflowTeams((prevTeams) => {
-        //   return [...prevTeams, { ...data, _id: crypto.randomUUID() }];
-        // });
+        setWorkflowTeams((prevTeams) => {
+          return [
+            ...prevTeams,
+            { ...data, _id: crypto.randomUUID(), newly_created: true },
+          ];
+        });
       } catch (err) {
         console.log(err);
         toast.error('Team not created');
@@ -285,12 +293,6 @@ const TeamsInWorkflowAi = () => {
       await workflowSettingServices.updateWorkflowTeam(updateData);
       toast.success('Team updated');
       updateWorkflowTeam(true, updateData);
-      // dispatchSelectedItems({
-      //   item: null,
-      //   title: '',
-      //   boxId: teamsInWorkflowAI[0].children[0]._id,
-      //   type: 'unselect_all',
-      // });
       setIsUpdatingTeam(false);
       setIsValidUpdateTeam(false);
     } catch (error) {
@@ -311,6 +313,7 @@ const TeamsInWorkflowAi = () => {
       }
       setWorkflowTeams(clone);
     } else {
+      const clone = [...workflowTeams];
     }
   };
 
@@ -403,10 +406,31 @@ const TeamsInWorkflowAi = () => {
 
   return (
     <div className={workflowAiSettingsStyles.box}>
+      {isFetchingTeams ? (
+        <div
+          className='loading_sect'
+          style={{
+            position: 'fixed',
+            width: '100%',
+            height: '100vh',
+            backgroundColor: '#26363294',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            top: 0,
+            left: 0,
+            zIndex: '10',
+          }}
+        >
+          <Spinner />
+        </div>
+      ) : (
+        ''
+      )}
       <h2
         className={`${workflowAiSettingsStyles.title} ${workflowAiSettingsStyles.title__m}`}
       >
-        {teamsInWorkflowAI[0].title}
+        {t(teamsInWorkflowAI[0].title)}
       </h2>
       <div className={workflowAiSettingsStyles.section__container}>
         <form style={{ width: '100%' }}>
@@ -436,7 +460,7 @@ const TeamsInWorkflowAi = () => {
                 : {}
             }
           >
-            {!isCreatingTeam ? 'create new team' : 'creating...'}
+            {!isCreatingTeam ? t('create new team') : t('creating...')}
           </button>
         </form>
         <div className={workflowAiSettingsStyles.section__box}>
@@ -488,7 +512,7 @@ const TeamsInWorkflowAi = () => {
                 : {}
             }
           >
-            {!isUpdatingTeam ? 'Update team details' : 'Updating...'}
+            {!isUpdatingTeam ? t('Update team details') : t('Updating...')}
           </button>
         </form>
       </div>
