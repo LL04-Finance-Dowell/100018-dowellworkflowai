@@ -1,52 +1,50 @@
+
 import React, { useState } from "react";
 import { useEffect } from "react";
 import styles from './Chat.module.css'
-import { BiSend } from "react-icons/bi";
+import { BiSend, BiMinimize } from "react-icons/bi";
 import axios from 'axios'
 import { useTranslation } from "react-i18next";
 
 const Chat = () => {
   const { t } = useTranslation();
-
+  const [isMinimized, setIsMinimized] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isNestedPopupOpen, setIsNestedPopupOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [modals, setModals] = useState({ product: "", portfolio: "" });
+  const [modals, setModal] = useState([]);
 
-useEffect(() => {
-fetch('https://100096.pythonanywhere.com/d-chat/Workflow-AI/?session_id=36ht78fmzfzgovk1lq5rqeozkpees1qi')
-.then(res => res.json())
-.then(data => setModals(data))
-}, [])
+  useEffect(() => {
+    fetch("https://100096.pythonanywhere.com/d-chat/Workflow-AI/?session_id=36ht78fmzfzgovk1lq5rqeozkpees1qi")
+      .then((res) => res.json())
+      .then((data) => setModal(data));
+  }, []);
+
+var room_id = modals.room_pk
 
 const handleMessageSend = () => {
-if (message.trim() === "") {
-return;
-}
-axios.post('https://100096.pythonanywhere.com/send_message/1/',
-{
-message,
-product: modals.product,
-portfolio: modals.portfolio
-}
-)
-.then(res => {
-const newMessage = { text: message, sender: "" };
-const updatedMessages = [...messages, newMessage];
-setMessages(updatedMessages);
-setMessage("");
-})
-.catch(err => console.log(err));
-}
+  if (message.trim() === "") {
+    return;
+  }
+  console.log(room_id)
+    console.log(message);
+    console.log(modals.product, modals.user_id);
+    axios
+      .post(`https://100096.pythonanywhere.com/send_message/${room_id}/`, {
+        message,
+        user_id: modals.user_id
+      })
+      .then((res) => {
+        const newMessage = { text: message, sender: "" };
+        const updatedMessages = [...messages, newMessage];
+        setMessages(updatedMessages);
 
-useEffect(() => {
-// fetch messages from API and update messages state
-fetch('https://100096.pythonanywhere.com/messages/')
-.then(res => res.json())
-.then(data => setMessages(data))
-}, [])
-
+        // Clear the input field
+        setMessage("");
+      })
+      .catch((err) => console.log(err));
+  };
   const handleButtonClick = () => {
     setIsPopupOpen(true);
   };
@@ -60,20 +58,31 @@ fetch('https://100096.pythonanywhere.com/messages/')
     setIsPopupOpen(false);
   };
 
-  const handleNestedPopupClose = () => {
+  function handleMinimizePopup() {
+    const storemessages = [...messages];
+    console.log(storemessages)
+    localStorage.setItem('messages', JSON.stringify(storemessages));
     setIsNestedPopupOpen(false);
-  };
+  }
 
-
+  function handleNestedPopupClose() {
+    localStorage.removeItem('messages');
+    setMessages([]);
+    setIsNestedPopupOpen(false);
+  }
 
   useEffect(() => {
-    // fetch messages from API and update messages state
-    fetch('https://100096.pythonanywhere.com/send_message/1/')
-      .then(res => res.json())
-      .then(data => console.log(data))
-  }, [])
+    // const messages = localStorage.getItem('messages');
+    // if (messages) {
+    //   setMessages(JSON.parse(messages));
+    // }
+  }, []);
 
-
+  // useEffect(() => {
+  //   fetch('https://100096.pythonanywhere.com/send_message/692/')
+  //     .then(res => res.json())
+  //     .then(data => console.log(data))
+  // }, [])
 
 
 
@@ -99,98 +108,97 @@ fetch('https://100096.pythonanywhere.com/messages/')
         </button>
 
         {isPopupOpen && (
-          <div className={styles.First_popuo}>
-            <div className={styles.First_inner} onClick={handlePopupClose}></div>
+          <div className={styles.First_popuopAuto_Close}>
+            <div className={styles.FirstAutoClose_inner} onClick={handlePopupClose}></div>
           </div>
         )}
 
         {isPopupOpen && (
-          <div className={styles.Second_popuo}>
-            <div className={styles.my_element}>
-              <div className={styles.my_element_one}>
-                <div className={styles.my_element_two}>
-                  <div className={styles.Second_popuo}>
-                    <button onClick={handlePopupClose} className={styles.close_button}>×</button>
-                  </div>
-                  <h2 className={styles.my_element_text}>
-                    {t("Chat with Customers Stories")}
-                  </h2>
-                  <p className={styles.First_p}>
-                    {t("Hi ! How Can I Help You !!!")}
-                  </p>
+          <div className={styles.First_popuop}>
 
-                  <div style={{ marginBottom: '1rem' }}>
-                    <button
-                      className={styles.Chat_Now}
-                      onClick={handleNestedButtonClick}
-                    >
-                     {t("Chat Now")}
-                    </button>
-                  </div>
-                  <h1 className={styles.Chat_h1}>
-                    {t("Powered by Dowell")}
-                  </h1>
-                </div>
-              </div>
+
+            <div className={styles.First_popuop_Parent}>
+
+              <button onClick={handlePopupClose} className={styles.close_button}>×</button>
+
+
+              <h2 className={styles.First_popuop_Stories}>
+                {t("Chat with Dowell")} {<img style={{marginLeft:"10px"}} height='20px' width='20px' src="https://i0.wp.com/workflowai.online/wp-content/uploads/2022/02/cropped-Playstore_logo_2.png?resize=100%2C100&ssl=1"/>}
+              </h2>
+              <p className={styles.First_popuop_sms}>
+                {t("Hi ! How Can I Help You !!!")}
+              </p>
+
+
+              <button
+                className={styles.Chat_Now_Button}
+                onClick={handleNestedButtonClick}
+              >
+                {t("Chat Now")}
+              </button>
+
+              <h1 className={styles.Powered_text}>
+                {t("Powered by Dowell")}
+              </h1>
             </div>
+
+
           </div>
         )}
 
         {isNestedPopupOpen && (
           <div
-            className={styles.Second_div}
+            className={styles.Second_popupAutoClose}
             onClick={handleNestedPopupClose}
           ></div>
 
         )}
 
         {isNestedPopupOpen && (
-          <div className={styles.Second_popuo_one}>
+          <div className={styles.Second_Popup}>
             <button onClick={handleNestedPopupClose} className={styles.close_button}>×</button>
-            <div className={styles.my_element}>
-              <div >
-                <div style={{ height: "10%" }}>
-                  <h2 className={styles.Text_Class}>{t("Chat with us")}</h2>
-                  <h2 className={styles.Text_Class}>{t("Product Name")} : {modals.product}</h2>
-                  <h2 className={styles.Text_Class}>{t("Portfolio No")} : {modals.portfolio}</h2>
-                  <div className={styles.chat - messages}>
-                    {messages.map((msg, idx) => (
-                      <div key={idx}>
-                        <p
-                          className={
-                            msg.sender === ""
-                              ? styles.Sender_sms
-                              : styles.Text
-                          }
-                        >
-                          {msg.text}
-                        </p>
-                        <small className={styles.Large_Text}>
-                          {msg.sender}
-                        </small>
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.Chat_Container}>
-                    <div className={styles.Another}>
-                      <input
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        type="text"
-                        className={styles.Second_last}
-                        placeholder={t("Type your message here")}
-                      />
-                      <button
-                        onClick={handleMessageSend}
-                        className={styles.Last}
-                      >
-                        <BiSend size={25}/>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <button onClick={handleMinimizePopup} className={styles.minimize_button}>-</button>
+            <div className={styles.Second_Popup_Parent}>
+              <h2 className={styles.Text_Class}>{t("Chat with us")}</h2>
+              <h2 className={styles.Text_Class}>{t("Product Name")} : {modals.product}</h2>
             </div>
+            {/* <h2 className={styles.Text_Class}>{t("Portfolio No")} : {modals.portfolio}</h2> */}
+            <div className={styles.chat_messages}>
+              {messages.map((msg, idx) => (
+
+                <div key={idx}>
+                  <p
+                    className={
+                      msg.sender === ""
+                        ? styles.Sender_sms
+                        : styles.Text
+                    }
+                  >
+                    {msg.text.substring(0, 35)}{msg.text.length > 35 && <br />}{msg.text.substring(35)}
+                  </p>
+                  <small className={styles.Large_Text}>
+                    {msg.sender}
+                  </small>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.Input_Container}>
+              <input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                type="text"
+                className={styles.Text_input}
+                placeholder={t("Type your message here")}
+              />
+              <button
+                onClick={handleMessageSend}
+                className={styles.Send_button}
+              >
+                <BiSend size={25} />
+              </button>
+            </div>
+
           </div>
         )}
       </div>
