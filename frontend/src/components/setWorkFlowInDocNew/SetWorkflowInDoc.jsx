@@ -77,6 +77,7 @@ const SetWorkflowInDoc = () => {
       setDraftProcess(null);
       setDraftProcessDoc(null);
       setIsDraftProcess(false);
+      setDraftProcessLoaded(false);
       return
     }
     
@@ -137,8 +138,9 @@ const SetWorkflowInDoc = () => {
     
     process?.process_steps.forEach((step, currentStepIndex) => {
       const stepKeys = Object.keys(step);
-
+      const keysProcessed = [];
       stepKeys.forEach(key => {
+        if (keysProcessed.includes(key)) return
         if (key === 'stepPublicMembers') {
           step[key].forEach(user => {
             // console.log(user)
@@ -162,13 +164,15 @@ const SetWorkflowInDoc = () => {
         if (key === 'stepDocumentMap') {
           step[key].forEach(item => {
             const newTableOfContentObj = {
-              id: item,
+              id: item.content,
               workflow: foundWorkflow._id,
               stepIndex: currentStepIndex,
+              required: item.required,
             };
             dispatch(setTableOfContentForStep(newTableOfContentObj));
           })
         }
+        keysProcessed.push(key)
       })
     });
 

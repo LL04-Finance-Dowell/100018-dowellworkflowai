@@ -74,6 +74,10 @@ const initialState = {
   processesLoading: true,
   processesLoaded: false,
   allProcesses: [],
+  ArrayofLinks:[],
+  linksFetched:false,
+  showGeneratedLinksPopup:false,
+
   legalStatusLoading: true,
   showLegalStatusPopup: false,
   legalTermsAgreed: false,
@@ -82,6 +86,7 @@ const initialState = {
   adminUser: false,
   adminUserPortfolioLoaded: false,
   selectedPortfolioTypeForWorkflowSettings: null,
+  savedProcessConfigured: false,
 };
 
 export const appSlice = createSlice({
@@ -97,6 +102,7 @@ export const appSlice = createSlice({
     setEditorLink: (state, action) => {
       state.editorLink = action.payload;
     },
+
     setWfToDocument: (state, action) => {
       state.wfToDocument = {
         ...state.wfToDocument,
@@ -185,6 +191,7 @@ export const appSlice = createSlice({
       state.userMembersSelectedForProcess = [];
       state.publicMembersSelectedForProcess = [];
       state.teamsSelectedSelectedForProcess = [];
+      state.savedProcessConfigured = false;
     },
     setProcessSteps: (state, action) => {
       state.processSteps = action.payload;
@@ -204,14 +211,14 @@ export const appSlice = createSlice({
       const currentProcessSteps = [...state.processSteps];
 
       if (!action.payload.workflow)
-        return void(state.processSteps = currentProcessSteps);
+        return void (state.processSteps = currentProcessSteps);
 
       const foundStepIndex = currentProcessSteps.findIndex(
         (step) => step.workflow === action.payload.workflow
       );
 
       if (foundStepIndex === -1)
-        return void(state.processSteps = currentProcessSteps);
+        return void (state.processSteps = currentProcessSteps);
 
       const currentStepToUpdate = currentProcessSteps[foundStepIndex];
       const updatedStepObj = {
@@ -512,6 +519,19 @@ export const appSlice = createSlice({
     setAllProcesses: (state, action) => {
       state.allProcesses = action.payload;
     },
+    SetArrayofLinks: (state, action) => {
+      state.ArrayofLinks = action.payload;
+    },
+
+
+    setShowGeneratedLinksPopup: (state, action) => {
+      state.showGeneratedLinksPopup = action.payload;
+    },
+    setLinksFetched: (state, action) => {
+      state.linksFetched = action.payload;
+    },
+
+
     setLegalStatusLoading: (state, action) => {
       state.legalStatusLoading = action.payload;
     },
@@ -535,6 +555,21 @@ export const appSlice = createSlice({
     },
     setSelectedPortfolioTypeForWorkflowSettings: (state, action) => {
       state.selectedPortfolioTypeForWorkflowSettings = action.payload;
+    },
+    updateSingleTableOfContentRequiredStatus: (state, action) => {
+      const currentTableOfContents = state.tableOfContentForStep;
+      if (!action.payload || !action.payload.hasOwnProperty('workflow') || !action.payload.hasOwnProperty('stepIndex') || !action.payload.hasOwnProperty('id')) return void (state.tableOfContentForStep = currentTableOfContents);
+      
+      const foundContentIndex = currentTableOfContents.findIndex((content) => content.stepIndex === action.payload.stepIndex && content.workflow === action.payload.workflow && content.id === action.payload.id);
+      if (foundContentIndex === -1) return void(state.tableOfContentForStep = currentTableOfContents);
+
+      const updatedContent = { ...currentTableOfContents[foundContentIndex], required: action.payload.value };
+      currentTableOfContents[foundContentIndex] = updatedContent;
+
+      state.tableOfContentForStep = currentTableOfContents;
+    },
+    setSavedProcessConfigured: (state, action) => {
+      state.savedProcessConfigured = action.payload
     },
   },
   extraReducers: (builder) => {
@@ -606,6 +641,9 @@ export const {
   setProcessesLoading,
   setProcessesLoaded,
   setAllProcesses,
+  SetArrayofLinks,
+  setShowGeneratedLinksPopup,
+  setLinksFetched,
   setLegalStatusLoading,
   setShowLegalStatusPopup,
   setLegalTermsAgreed,
@@ -614,6 +652,8 @@ export const {
   setAdminUser,
   setAdminUserPortfolioLoaded,
   setSelectedPortfolioTypeForWorkflowSettings,
+  updateSingleTableOfContentRequiredStatus,
+  setSavedProcessConfigured,
 } = appSlice.actions;
 
 export default appSlice.reducer;

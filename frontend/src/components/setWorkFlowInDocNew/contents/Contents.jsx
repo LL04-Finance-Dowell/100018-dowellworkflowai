@@ -4,9 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   removeFromTableOfContentForStep,
   setTableOfContentForStep,
+  updateSingleTableOfContentRequiredStatus,
 } from "../../../features/app/appSlice";
 import styles from "./contents.module.css";
 import { Tooltip } from 'react-tooltip'
+import { toast } from "react-toastify";
+import ContentPagination from "./contentPagination/ContentPagination";
 
 const Contents = ({
   contents,
@@ -14,6 +17,7 @@ const Contents = ({
   feature,
   currentStepIndex,
   showCheckBoxForContent,
+  stepsPopulated,
 }) => {
   const contentRef = useRef(null);
   const [currentTableItem, setCurrentTableItem] = useState(null);
@@ -23,6 +27,7 @@ const Contents = ({
   );
   const [contentsPageWise, setContentsPageWise] = useState([]);
   const [showContent, setShowContent] = useState([]);
+  const [ currentPage, setCurrentPage ] = useState(1);
 
   /*  const handleAddContent = (content) => {
     console.log(content);
@@ -35,7 +40,7 @@ const Contents = ({
     console.log(selectedContents);
   }; */
 
-  const handleContentSelection = (valueAsJSON) => {
+  const handleContentSelection = (valueAsJSON, contentPage) => {
     const contentStepAlreadyAdded = tableOfContentForStep.find(
       (step) =>
         step.workflow === docCurrentWorkflow._id &&
@@ -51,6 +56,8 @@ const Contents = ({
       ...valueAsJSON,
       workflow: docCurrentWorkflow._id,
       stepIndex: currentStepIndex,
+      required: false,
+      page: contentPage,
     };
 
     dispatch(setTableOfContentForStep(newTableOfContentObj));
@@ -70,6 +77,8 @@ const Contents = ({
         return { show: false, id: content.id };
       })
     );
+
+    setCurrentPage(1);
   }, [contents]);
 
   const handleShowContent = (value, id) => {
@@ -82,18 +91,42 @@ const Contents = ({
     setShowContent(currentContents);
   };
 
+  const handleContentCheckboxChange = (checkboxElem, itemId) => {
+    // checking if the item has been selected
+    const contentStepSelected = tableOfContentForStep.find(
+      (step) =>
+        step.workflow === docCurrentWorkflow._id &&
+        step.id === itemId &&
+        step.stepIndex === currentStepIndex
+    );
+
+    if (!contentStepSelected) {
+      checkboxElem.checked = false;
+      return toast.info(`Please select ${itemId} first`)
+    }
+    
+    dispatch(
+      updateSingleTableOfContentRequiredStatus({
+        stepIndex: currentStepIndex,
+        workflow: docCurrentWorkflow._id,
+        id: itemId,
+        value: checkboxElem.checked
+      })
+    )
+  }
+
   // console.log("contentscontents", contentsPageWise);
 
   return (
     <div
       style={{
         maxHeight: 
-          feature === "table-of-contents" ? "8rem" 
+          feature === "table-of-contents" ? "13rem" 
           :
           toggleContent ? `${contentRef.current?.getBoundingClientRect().height}px`
           : "0px",
         padding: feature && feature === "table-of-contents" ? "0" : "",
-        overflow: feature === "table-of-contents" ? "auto" : ""
+        overflow: feature === "table-of-contents" ? "" : ""
       }}
       className={styles.content__container}
     >
@@ -139,26 +172,33 @@ const Contents = ({
             </>
           ) : (
             <>
-            <ol>
-              {React.Children.toArray(contents.map((item) => {
-                return <li
-                  /*   className={selectedContents.map(
-                    (selectedItem) =>
-                      selectedItem._id === item._id &&
-                      styles.current__table__item
-                  )} */
-                  /*  onClick={() => handleAddContent(item)} */
-                  // key={item._id}
-                  style={feature && feature === "table-of-contents" ? { width: "100%" } : {}}
+            <p style={{ fontSize: "0.85rem", marginBottom: '0.3rem' }}>Select Page</p>
+            <ContentPagination 
+              pages={Object.keys(contentsPageWise || {}).length} 
+              currentPage={currentPage}
+              updateCurrentPage={setCurrentPage}
+            />
+            <ol className={styles.table__Of__Content__List}>
+              {React.Children.toArray(contentsPageWise[currentPage]?.map((item) => (
+                <li
+                  style={
+                    feature && feature === "table-of-contents" ? { 
+                      width: "100%",
+                      padding: "2px 5px 2px 0",
+                    } 
+                    : {
+
+                    }
+                  }
                 >
                   <span 
                     style={
-                      tableOfContentForStep.find(
-                        (step) =>
-                          step.workflow === docCurrentWorkflow._id &&
-                          step.id === item.id &&
-                          step.stepIndex === currentStepIndex
-                      ) && 
+                      // tableOfContentForStep.find(
+                      //   (step) =>
+                      //     step.workflow === docCurrentWorkflow._id &&
+                      //     step.id === item.id &&
+                      //     step.stepIndex === currentStepIndex
+                      // ) && 
                       feature && feature === "table-of-contents" ? 
                       { 
                         width: "100%" 
@@ -177,7 +217,12 @@ const Contents = ({
                         />
                       </>
                     ) : (
-                      <>
+                      <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "1rem",
+                      }}>
                         <a
                           style={
                             tableOfContentForStep.find(
@@ -201,7 +246,7 @@ const Contents = ({
                               }
                           }
                           onClick={
-                            () => handleContentSelection(item)
+                            () => handleContentSelection(item, currentPage)
                           }
                           id={item._id + currentStepIndex}
                         >
@@ -212,15 +257,28 @@ const Contents = ({
                           onClick={() => handleShowContent(true, item.id)}
                         /> */}
                         {
-                          feature && feature === "table-of-contents" ?
-                          <Tooltip anchorId={item._id + currentStepIndex} content={item.data ? item.data : "No data"} place="top" /> : 
+                          feature && feature === "table-of-contents" ? <>
+                            <input 
+                              id={item._id + currentStepIndex + item._id} 
+                              type="checkbox" 
+                              onChange={({ target}) => handleContentCheckboxChange(target, item.id)} 
+                              checked={tableOfContentForStep.find(
+                                (step) =>
+                                  step.workflow === docCurrentWorkflow._id &&
+                                  step.id === item.id &&
+                                  step.stepIndex === currentStepIndex
+                              )?.required}
+                            />
+                            <Tooltip anchorId={item._id + currentStepIndex} content={item.data ? item.data : "No data"} place="top" />  
+                            <Tooltip anchorId={item._id + currentStepIndex + item._id} content={"Required or not required"} place="top" />  
+                          </> : 
                           <></>
                         }
-                      </>
+                      </div>
                     )}
                   </span>
                 </li>
-              }))}
+              )))}
             </ol>
             </>
           )
