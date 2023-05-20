@@ -50,7 +50,7 @@ const ManageFile = () => {
       company_id: userDetail?.portfolio_info[0].org_id,
       data_type: userDetail?.portfolio_info[0].data_type,
     };
-
+// console.log(allWorkflowsArray)
     /*  if (savedDocumentsStatus === "idle") dispatch(savedDocuments(data));
     if (savedTemplatesItemsStatus === "idle") dispatch(savedTemplates(data));
     if (savedWorkflowStatus === "idle") dispatch(savedWorkflows(data)); */

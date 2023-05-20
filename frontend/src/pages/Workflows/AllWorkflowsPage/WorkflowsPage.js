@@ -46,7 +46,7 @@ const WorkflowsPage = ({ home, showOnlySaved, showOnlyTrashed }) => {
 		if (home) navigate('#drafts')
 	}, [showOnlySaved, showOnlyTrashed, home])
 
-	console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwww", allWorkflowsArray);
+	// console.log("all", allWorkflowsArray);
 
 	return (
 		<WorkflowLayout>
@@ -56,7 +56,7 @@ const WorkflowsPage = ({ home, showOnlySaved, showOnlyTrashed }) => {
 						home ? <div id="drafts">
 							<SectionBox
 								cardBgColor="#1ABC9C"
-								title="drafts"
+								title="My Workflows"
 								cardItems={
 									allWorkflowsArray &&
 									allWorkflowsArray.length &&

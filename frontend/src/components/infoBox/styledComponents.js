@@ -57,7 +57,7 @@ export const InfoContentContainer = styled.div`
 `;
 
 export const InfoSearchbar = styled.input`
-  width: 65%;
+  width: ${(props) => props.fullWidth ? '100%' : '65%'};
   max-width: 100%;
   background-color: transparent;
   outline: none;
@@ -91,4 +91,5 @@ export const InfoContentFormText = styled.li`
   padding-left: 5px;
   gap: 10px;
   align-items: center;
+  margin-bottom: 5px;
 `;
