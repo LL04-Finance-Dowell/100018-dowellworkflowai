@@ -11,6 +11,7 @@ import {setShowGeneratedLinksPopup,SetArrayofLinks,setLinksFetched  } from "../.
 import GeneratedLinksModal from "../../setWorkFlowInDocNew/steps/processDocument/components/GeneratedLinksModal/GeneratedLinksModal";
 import { Button } from "../styledComponents";
 import { LoadingSpinner } from "../../LoadingSpinner/LoadingSpinner";
+import { api_url } from "../../../httpCommon/httpCommon";
 
 const ProcessCard = ({ cardItem, title }) => {
   const { userDetail } = useSelector((state) => state.auth);
@@ -41,7 +42,7 @@ const ProcessCard = ({ cardItem, title }) => {
 
 
   function getProcessLinks(process_id) {
-    fetch(`https://100094.pythonanywhere.com/v1/processes/${process_id}/all-links/`)
+    fetch(`${api_url}processes/${process_id}/all-links/`)
     .then(res => res.json())
     .then(data => {
       dispatch(SetArrayofLinks(data));
