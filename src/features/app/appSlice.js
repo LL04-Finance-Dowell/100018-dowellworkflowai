@@ -76,8 +76,8 @@ const initialState = {
   processesLoaded: false,
   allProcesses: [],
   ArrayofLinks: [],
-
-CopyProcess:[],
+  ShowProfileSpinner: false,
+  CopyProcess: [],
 
   linksFetched: false,
   showGeneratedLinksPopup: false,
@@ -284,7 +284,7 @@ export const appSlice = createSlice({
       state.themeColor = action.payload;
     },
     setSettingProccess: (state, { payload: { payload, type } }) => {
-      console.log('payL: ', payload);
+      // console.log('payL: ', payload);
       switch (type) {
         case 'p_title':
           state.settingProccess[0].children[4].column =
@@ -295,9 +295,11 @@ export const appSlice = createSlice({
                   item._id === col.pItemId
               );
 
-              console.log('pItem: ', pItem);
+              // console.log('pItem: ', pItem);
+
               return pItem.content.includes('set display name')
                 ? {
+                    // todo fix this up
                     ...col,
                     pItemId: pItem._id,
                   }
@@ -333,6 +335,46 @@ export const appSlice = createSlice({
           break;
         case 'reps':
           state.settingProccess[0].children[4].column[7].items = [...payload];
+          break;
+        case 'rights':
+          let rights = [];
+          switch (payload.toLowerCase()) {
+            case 'view':
+              rights = ['view'];
+              break;
+            case 'add/edit':
+              rights = ['view', 'use', 'add', 'make copy'];
+              break;
+            case 'delete':
+              rights = [
+                'view',
+                'use',
+                'add',
+                'make copy',
+                'edit',
+                'disable',
+                'enable',
+              ];
+              break;
+            case 'admin':
+              rights = [
+                'view',
+                'use',
+                'add',
+                'make copy',
+                'edit',
+                'disable',
+                'enable',
+                'languages',
+                'admin',
+              ];
+              break;
+            default:
+              throw new Error('THIS IS IMPOSSIBLE!');
+          }
+          state.settingProccess[0].children[2].column[0].items = rights.map(
+            (right) => ({ _id: uuidv4(), content: right, isSelected: false })
+          );
           break;
         default:
           return state;
@@ -615,6 +657,9 @@ export const appSlice = createSlice({
     SetCopyProcess: (state, action) => {
       state.CopyProcess = action.payload;
     },
+    setShowProfileSpinner: (state, action) => {
+      state.ShowProfileSpinner = action.payload;
+    },
 
     setShowGeneratedLinksPopup: (state, action) => {
       state.showGeneratedLinksPopup = action.payload;
@@ -735,7 +780,7 @@ export const {
   setPortfoliosInWorkflowAITeams,
   setUpdateInWorkflowAITeams,
   setUserDetailPosition,
-
+  setShowProfileSpinner,
   setLanguageSelectPosition,
   setIconColor,
   setUpdateProccessApi,

@@ -9,6 +9,7 @@ import {
   setSettingProccessTeams,
   setSettingProccessPortfolios,
   setUpdateProccess,
+  setSettingProccess,
 } from '../../../features/app/appSlice';
 import { setIsSelected } from '../../../utils/helpers';
 import { createWorkflowSettings } from '../../../features/settings/asyncThunks';
@@ -25,7 +26,7 @@ const EnabledProcess = () => {
   const { userDetail } = useSelector((state) => state.auth);
   const { teamsInWorkflowAI } = useSelector((state) => state.app);
 
-  const { workflowTeams } = useAppContext();
+  const { workflowTeams, isDesktop, nonDesktopStyles } = useAppContext();
   const [userPortfolios] = useState(
     userDetail?.portfolio_info?.find((item) => item.product === 'Workflow AI')
       ?.member_type === 'owner'
@@ -42,6 +43,15 @@ const EnabledProcess = () => {
           };
         })
   );
+
+  const [portfolios] = useState(
+    userDetail?.portfolio_info?.find((item) => item.product === 'Workflow AI')
+      ?.member_type === 'owner'
+      ? [...userDetail?.userportfolio]
+      : [...userDetail?.selected_product?.userportfolio]
+  );
+
+  const [portfolioRights, setPortfolioRights] = useState('');
 
   const { handleSubmit, register } = useForm();
 
@@ -65,7 +75,7 @@ const EnabledProcess = () => {
       column: item.column.filter((col) => col.items.length !== 0),
     }));
 
-    console.log('payload', JSON.stringify(purePayload));
+    // console.log('payload', JSON.stringify(purePayload));
 
     const createData = {
       company_id: userDetail?.portfolio_info[0]?.org_id,
@@ -78,13 +88,13 @@ const EnabledProcess = () => {
     dispatch(createWorkflowSettings(createData));
   };
 
-  console.log(
-    'createWorkflowSettingsItems?.workflow_setting.processes.process',
-    createWorkflowSettingsItems?.workflow_setting.processes[0].process,
-    settingProccess
-  );
+  // console.log(
+  //   'createWorkflowSettingsItems?.workflow_setting.processes.process',
+  //   createWorkflowSettingsItems?.workflow_setting.processes[0].process,
+  //   settingProccess
+  // );
 
-  const handleOnChange = ({ item, title, boxId, type }) => {
+  const handleOnChange = ({ item, title, boxId, type }, e, checkFunc) => {
     const isSelectedItems = setIsSelected({
       items: settingProccess[0].children,
       item,
@@ -93,6 +103,13 @@ const EnabledProcess = () => {
       type,
     });
     dispatch(setUpdateProccess(isSelectedItems));
+
+    // if (checkFunc) {
+    //   const selectedPort = settingProccess[0].children[0].column[1].items.find(
+    //     (item) => item.isSelected
+    //   );
+    //   console.log('sele Port: ', selectedPort);
+    // }
 
     // const lowerCaseTitle = title.toLowerCase();
     // if (lowerCaseTitle === 'portfolios') {
@@ -112,13 +129,31 @@ const EnabledProcess = () => {
     // }
   };
 
-  createWorkflowSettingsItems &&
-    createWorkflowSettingsItems.length > 0 &&
-    console.log('createWorkflowSettingsItems', [
-      settingProccess[0].children[0],
-      ...createWorkflowSettingsItems,
-    ]);
-  console.log('createWorkflowSettingsItemsstatus', createStatus);
+  // createWorkflowSettingsItems &&
+  //   createWorkflowSettingsItems.length > 0 &&
+  //   console.log('createWorkflowSettingsItems', [
+  //     settingProccess[0].children[0],
+  //     ...createWorkflowSettingsItems,
+  //   ]);
+  // console.log('createWorkflowSettingsItemsstatus', createStatus);
+
+  useEffect(() => {
+    const selectedPort = settingProccess[0].children[0].column[1].items.find(
+      (item) => item.isSelected
+    );
+    if (selectedPort)
+      setPortfolioRights(
+        portfolios.find((port) => port.portfolio_name === selectedPort.content)
+          .operations_right
+      );
+  }, [settingProccess]);
+
+  useEffect(() => {
+    if (portfolioRights)
+      dispatch(
+        setSettingProccess({ payload: portfolioRights, type: 'rights' })
+      );
+  }, [portfolioRights]);
 
   useEffect(() => {
     if (
@@ -139,10 +174,10 @@ const EnabledProcess = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userPortfolios]);
 
-  useEffect(() => {
-    console.log('teams: ', teamsInWorkflowAI);
-    console.log('settingPr: ', settingProccess);
-  });
+  // useEffect(() => {
+  //   console.log('teams: ', teamsInWorkflowAI);
+  //   console.log('settingPr: ', settingProccess);
+  // });
 
   return (
     <>
@@ -157,55 +192,112 @@ const EnabledProcess = () => {
             >
               {t(item.title)}
             </h2>
-            <div className={workflowAiSettingsStyles.section__container}>
-              {item.children && (
-                <>
-                  <div className={workflowAiSettingsStyles.section__box}>
-                    {item.children[0].column.map((colItem) => (
-                      <InfoBox
-                        key={colItem._id}
-                        type='radio'
-                        boxId={item.children[0]._id}
-                        register={register}
-                        items={colItem.items}
-                        title={colItem.proccess_title}
-                        onChange={handleOnChange}
-                        modPort={true}
-                      />
-                    ))}
-                  </div>
-
-                  {item.children?.slice(1, 4)?.map((childItem) => (
-                    <div
-                      key={childItem._id}
-                      className={workflowAiSettingsStyles.section__box}
-                    >
-                      {childItem.column.map((colItem) => (
+            {isDesktop ? (
+              <div className={workflowAiSettingsStyles.section__container}>
+                {item.children && (
+                  <>
+                    <div className={workflowAiSettingsStyles.section__box}>
+                      {item.children[0].column.map((colItem) => (
                         <InfoBox
                           key={colItem._id}
-                          boxId={childItem._id}
+                          type='radio'
+                          boxId={item.children[0]._id}
                           register={register}
                           items={colItem.items}
                           title={colItem.proccess_title}
                           onChange={handleOnChange}
-                          type='checkbox'
+                          modPort={true}
+                          specials={'ep_port'}
                         />
                       ))}
                     </div>
-                  ))}
 
-                  {!!item.children
-                    .slice(4)[0]
-                    .column.find((col) => col.items.length) && (
-                    <div className='container'>
-                      <h5>Enabled Processes</h5>
+                    {item.children?.slice(1, 4)?.map((childItem) => (
+                      <div
+                        key={childItem._id}
+                        className={workflowAiSettingsStyles.section__box}
+                      >
+                        {childItem.column.map((colItem) => (
+                          <InfoBox
+                            key={colItem._id}
+                            boxId={childItem._id}
+                            register={register}
+                            items={colItem.items}
+                            title={colItem.proccess_title}
+                            onChange={handleOnChange}
+                            type='checkbox'
+                          />
+                        ))}
+                      </div>
+                    ))}
 
-                      {item.children?.slice(4)?.map((childItem) => (
+                    {/* {item.children?.slice(0, 4)?.map((childItem, ind) => (
+                    <>
+                      {childItem.column.map((colItem) => (
                         <div
                           key={childItem._id}
                           className={workflowAiSettingsStyles.section__box}
                         >
-                          {childItem.column.map((colItem) => (
+                          <InfoBox
+                            key={colItem._id}
+                            boxId={childItem._id}
+                            register={register}
+                            items={colItem.items}
+                            title={colItem.proccess_title}
+                            onChange={handleOnChange}
+                            type={ind === 0 ? 'radio' : 'checkbox'}
+                            modPort={ind === 0}
+                            specials={ind === 0 ? 'ep_port' : ''}
+                          />
+                        </div>
+                      ))}
+                    </>
+                  ))} */}
+
+                    {!!item.children
+                      .slice(4)[0]
+                      .column.find((col) => col.items.length) && (
+                      <div className='container'>
+                        <h5>Enabled Processes</h5>
+
+                        {item.children?.slice(4)?.map((childItem) => (
+                          <div
+                            key={childItem._id}
+                            className={workflowAiSettingsStyles.section__box}
+                          >
+                            {childItem.column.map((colItem) => (
+                              <InfoBox
+                                key={colItem._id}
+                                boxId={childItem._id}
+                                register={register}
+                                items={colItem.items}
+                                title={colItem.proccess_title}
+                                onChange={handleOnChange}
+                                type='checkbox'
+                                specials='ep'
+                              />
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            ) : (
+              <div
+                className={workflowAiSettingsStyles.section__container}
+                style={nonDesktopStyles}
+              >
+                {item.children && (
+                  <>
+                    {item.children?.slice(0, 4)?.map((childItem, ind) => (
+                      <>
+                        {childItem.column.map((colItem) => (
+                          <div
+                            key={colItem._id}
+                            className={workflowAiSettingsStyles.section__box}
+                          >
                             <InfoBox
                               key={colItem._id}
                               boxId={childItem._id}
@@ -213,17 +305,57 @@ const EnabledProcess = () => {
                               items={colItem.items}
                               title={colItem.proccess_title}
                               onChange={handleOnChange}
-                              type='checkbox'
-                              specials='ep'
+                              type={ind === 0 ? 'radio' : 'checkbox'}
+                              modPort={ind === 0}
+                              specials={ind === 0 ? 'ep_port' : ''}
                             />
+                          </div>
+                        ))}
+                      </>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+
+            {!isDesktop && (
+              <>
+                {!!item.children
+                  .slice(4)[0]
+                  .column.find((col) => col.items.length) && (
+                  <div className='super_container'>
+                    <h5>Enabled Processes</h5>
+
+                    <div
+                      className={workflowAiSettingsStyles.section__container}
+                      style={nonDesktopStyles}
+                    >
+                      {item.children?.slice(4)?.map((childItem) => (
+                        <>
+                          {childItem.column.map((colItem) => (
+                            <div
+                              key={childItem._id}
+                              className={workflowAiSettingsStyles.section__box}
+                            >
+                              <InfoBox
+                                key={colItem._id}
+                                boxId={childItem._id}
+                                register={register}
+                                items={colItem.items}
+                                title={colItem.proccess_title}
+                                onChange={handleOnChange}
+                                type='checkbox'
+                                specials='ep'
+                              />
+                            </div>
                           ))}
-                        </div>
+                        </>
                       ))}
                     </div>
-                  )}
-                </>
-              )}
-            </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         ))}
         <button

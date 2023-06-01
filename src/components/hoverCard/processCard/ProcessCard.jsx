@@ -37,7 +37,7 @@ const ProcessCard = ({ cardItem, title }) => {
       );
   };
 
- 
+
 
 
   const handleCopyProcess = async (item) => {
@@ -48,7 +48,7 @@ const ProcessCard = ({ cardItem, title }) => {
   };
 
   async function getCopyProcess(process_id) {
-    // const copyOfAllProcesses = [...allProcesses];
+
     try {
       const response = await axios.post(`${api_url}processes/${process_id}/copies/`, {
         created_by: userDetail?.userinfo?.username,
@@ -56,17 +56,11 @@ const ProcessCard = ({ cardItem, title }) => {
       });
 
       if (response.status === 201) {
-        console.log("Copy process created successfully.");
         toast.info(response.data);
         console.log(response.data);
 
         setcopyprocessLoading(false);
 
-        // dispatch(
-        //   setAllProcesses(
-        //     [...allProcesses], allProcesses.filter(process => process.process_kind == "clone")
-        //   )
-        // );
 
       } else {
         console.log("Post request failed. Status code:", response.status);
@@ -177,7 +171,7 @@ const ProcessCard = ({ cardItem, title }) => {
             transform: 'translate(-51%, -145%) rotate(268deg)',
             color: '#fff',
             fontSize: '10px'
-          }}>Copied</span>
+          }}>Copy</span>
         </div>}
         {cardItem.process_title ? cardItem.process_title : "no item"}
       </div>
