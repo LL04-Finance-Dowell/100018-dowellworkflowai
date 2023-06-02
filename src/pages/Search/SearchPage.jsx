@@ -23,8 +23,11 @@ import { WorkflowServices } from '../../services/workflowServices';
 import { setAllDocuments } from '../../features/document/documentSlice';
 import { setAllTemplates } from '../../features/template/templateSlice';
 import { setAllWorkflows } from '../../features/workflow/workflowsSlice';
+import { useMediaQuery } from 'react-responsive';
 
 import { MdFilterList } from 'react-icons/md';
+import DisplaySearch from './DisplaySearch';
+import { productName } from '../../utils/helpers';
 
 const searchCategories = {
   documents: 'documents',
@@ -53,6 +56,9 @@ const SearchPage = () => {
   const [filterTemps, setFilterTemps] = useState([]);
   const [filterWorks, setFilterWorks] = useState([]);
   const [isDropdown, setIsDropdown] = useState(false);
+  const nonDesktop = useMediaQuery({
+    query: '(max-width: 750px)',
+  });
 
   useEffect(() => {
     if (!state) return;
@@ -145,7 +151,6 @@ const SearchPage = () => {
     refreshLoading,
   ]);
 
-  // !CHECK HERE FOR WORKFLOW SEARCH ISHS
   useEffect(() => {
     const currentSearchResults = searchResults.slice();
 
@@ -189,9 +194,21 @@ const SearchPage = () => {
 
     setRefreshLoading(true);
 
+    const [ currentUserportfolioDataType, currentUserCompanyId ] = [
+      userDetail?.portfolio_info?.length > 1 ? 
+        userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.data_type
+        :
+      userDetail?.portfolio_info[0]?.data_type,
+        
+      userDetail?.portfolio_info?.length > 1 ? 
+        userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_id
+        :
+      userDetail?.portfolio_info[0].org_id
+    ]
+
     const data = {
-      company_id: userDetail?.portfolio_info[0].org_id,
-      data_type: userDetail?.portfolio_info[0].data_type,
+      company_id: currentUserCompanyId,
+      data_type: currentUserportfolioDataType,
     };
 
     const documentServices = new DocumentServices();
@@ -213,7 +230,7 @@ const SearchPage = () => {
               (document) =>
                 document.document_state !== 'trash' &&
                 document.data_type &&
-                document.data_type === userDetail?.portfolio_info[0]?.data_type
+                document.data_type === currentUserportfolioDataType
             )
         )
       );
@@ -225,7 +242,7 @@ const SearchPage = () => {
             .filter(
               (template) =>
                 template.data_type &&
-                template.data_type === userDetail?.portfolio_info[0]?.data_type
+                template.data_type === currentUserportfolioDataType
             )
         )
       );
@@ -236,10 +253,10 @@ const SearchPage = () => {
             (workflow) =>
               (workflow?.data_type &&
                 workflow?.data_type ===
-                  userDetail?.portfolio_info[0]?.data_type) ||
+                  currentUserportfolioDataType) ||
               (workflow.workflows.data_type &&
                 workflow.workflows.data_type ===
-                  userDetail?.portfolio_info[0]?.data_type)
+                  currentUserportfolioDataType)
           )
         )
       );
@@ -325,115 +342,121 @@ const SearchPage = () => {
                 />
               </form>
 
-              <div className={styles.search_filter_sect}>
-                <button
-                  className={styles.search_drop_btn}
-                  onClick={() => setIsDropdown(!isDropdown)}
-                  style={isDropdown ? { borderRadius: '5px 5px 0 0' } : {}}
-                >
-                  <span className='filter_icon' style={{ marginRight: '10px' }}>
-                    <MdFilterList />
-                  </span>
-                  {currentSearchOption === 'documents'
-                    ? 'Documents'
-                    : currentSearchOption === 'templates'
-                    ? 'Templates'
-                    : currentSearchOption === 'workflows'
-                    ? 'Workflows'
-                    : 'All'}
-                </button>
-                <div
-                  style={
-                    isDropdown
-                      ? {
-                          height: '130px',
-                        }
-                      : { height: '0' }
-                  }
-                  className={styles.search_drop_opts_super_wrapper}
-                >
-                  <div className={styles.search_drop_opts_wrapper}>
-                    <label>
-                      <input
-                        type={'radio'}
-                        checked={
-                          currentSearchOption === searchCategories.all
-                            ? true
-                            : false
-                        }
-                        value={searchCategories.all}
-                        onChange={(e) => {
-                          setCurrentSearchOption(e.target.value);
-                          setIsDropdown(false);
-                        }}
-                      />
-                      All
-                    </label>
-                    <label>
-                      <input
-                        type={'radio'}
-                        checked={
-                          currentSearchOption === searchCategories.documents
-                            ? true
-                            : false
-                        }
-                        value={searchCategories.documents}
-                        onChange={(e) => {
-                          setCurrentSearchOption(e.target.value);
-                          setIsDropdown(false);
-                        }}
-                      />
-                      Documents
-                    </label>
-                    <label>
-                      <input
-                        type={'radio'}
-                        checked={
-                          currentSearchOption === searchCategories.templates
-                            ? true
-                            : false
-                        }
-                        value={searchCategories.templates}
-                        onChange={(e) => {
-                          setCurrentSearchOption(e.target.value);
-                          setIsDropdown(false);
-                        }}
-                      />
-                      Templates
-                    </label>
-                    <label>
-                      <input
-                        type={'radio'}
-                        checked={
-                          currentSearchOption === searchCategories.workflows
-                            ? true
-                            : false
-                        }
-                        value={searchCategories.workflows}
-                        onChange={(e) => {
-                          setCurrentSearchOption(e.target.value);
-                          setIsDropdown(false);
-                        }}
-                      />
-                      Workflows
-                    </label>
+              <div className={styles.btns_wrapper}>
+                <div className={styles.search_filter_sect}>
+                  <button
+                    className={styles.search_drop_btn}
+                    onClick={() => setIsDropdown(!isDropdown)}
+                    style={isDropdown ? { borderRadius: '5px 5px 0 0' } : {}}
+                  >
+                    <span
+                      className='filter_icon'
+                      style={{ marginRight: '10px' }}
+                    >
+                      <MdFilterList />
+                    </span>
+                    {currentSearchOption === 'documents'
+                      ? 'Documents'
+                      : currentSearchOption === 'templates'
+                      ? 'Templates'
+                      : currentSearchOption === 'workflows'
+                      ? 'Workflows'
+                      : 'All'}
+                  </button>
+                  <div
+                    style={
+                      isDropdown
+                        ? {
+                            height: '130px',
+                          }
+                        : { height: '0' }
+                    }
+                    className={styles.search_drop_opts_super_wrapper}
+                  >
+                    <div className={styles.search_drop_opts_wrapper}>
+                      <label>
+                        <input
+                          type={'radio'}
+                          checked={
+                            currentSearchOption === searchCategories.all
+                              ? true
+                              : false
+                          }
+                          value={searchCategories.all}
+                          onChange={(e) => {
+                            setCurrentSearchOption(e.target.value);
+                            setIsDropdown(false);
+                          }}
+                        />
+                        All
+                      </label>
+                      <label>
+                        <input
+                          type={'radio'}
+                          checked={
+                            currentSearchOption === searchCategories.documents
+                              ? true
+                              : false
+                          }
+                          value={searchCategories.documents}
+                          onChange={(e) => {
+                            setCurrentSearchOption(e.target.value);
+                            setIsDropdown(false);
+                          }}
+                        />
+                        Documents
+                      </label>
+                      <label>
+                        <input
+                          type={'radio'}
+                          checked={
+                            currentSearchOption === searchCategories.templates
+                              ? true
+                              : false
+                          }
+                          value={searchCategories.templates}
+                          onChange={(e) => {
+                            setCurrentSearchOption(e.target.value);
+                            setIsDropdown(false);
+                          }}
+                        />
+                        Templates
+                      </label>
+                      <label>
+                        <input
+                          type={'radio'}
+                          checked={
+                            currentSearchOption === searchCategories.workflows
+                              ? true
+                              : false
+                          }
+                          value={searchCategories.workflows}
+                          onChange={(e) => {
+                            setCurrentSearchOption(e.target.value);
+                            setIsDropdown(false);
+                          }}
+                        />
+                        Workflows
+                      </label>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <button className={styles.refresh__btn} onClick={handleRefresh}>
-                {refreshLoading ? (
-                  <LoadingSpinner
-                    color={'white'}
-                    width={'1rem'}
-                    height={'1rem'}
-                  />
-                ) : (
-                  <IoIosRefresh />
-                )}
-                <span>Refresh</span>
-              </button>
+                <button className={styles.refresh__btn} onClick={handleRefresh}>
+                  {refreshLoading ? (
+                    <LoadingSpinner
+                      color={'white'}
+                      width={'1rem'}
+                      height={'1rem'}
+                    />
+                  ) : (
+                    <IoIosRefresh />
+                  )}
+                  <span>Refresh</span>
+                </button>
+              </div>
             </div>
+
             <div className={styles.minified__Search__Container}>
               {searchLoading ? (
                 <p>{`Please wait.${
@@ -455,91 +478,110 @@ const SearchPage = () => {
                     </p>
                   ) : currentSearchOption === searchCategories.all ? (
                     <div className={`${styles.all__search__result__wrapper}`}>
-                      <div className={`${styles.all__search__result__header}`}>
-                        <span
-                          style={{
-                            backgroundColor: 'var(--e-global-color-accent)',
-                          }}
-                        >
-                          documents
-                        </span>
-                        <span
-                          style={{
-                            backgroundColor: 'var(--e-global-color-62c33d9)',
-                          }}
-                        >
-                          templates
-                        </span>
-                        <span
-                          style={{
-                            backgroundColor: 'var(--e-global-color-1342d1f)',
-                          }}
-                        >
-                          workflows
-                        </span>
-                      </div>
+                      {!nonDesktop ? (
+                        <>
+                          <div
+                            className={`${styles.all__search__result__header}`}
+                          >
+                            <span
+                              style={{
+                                backgroundColor: 'var(--e-global-color-accent)',
+                              }}
+                            >
+                              documents
+                            </span>
+                            <span
+                              style={{
+                                backgroundColor:
+                                  'var(--e-global-color-62c33d9)',
+                              }}
+                            >
+                              templates
+                            </span>
+                            <span
+                              style={{
+                                backgroundColor:
+                                  'var(--e-global-color-1342d1f)',
+                              }}
+                            >
+                              workflows
+                            </span>
+                          </div>
 
-                      <div className={`${styles.all__search__result__main}`}>
-                        <article
-                          className={`${styles.all__search__result__opts}`}
-                        >
-                          {filterDocs.map((doc, ind) => {
-                            if (doc) {
-                              return (
-                                <button
-                                  key={ind}
-                                  className={`${styles.all__search__result__btn} `}
-                                  id={doc._id}
-                                  onClick={() => handleSearchItemClick(doc)}
-                                >
-                                  {doc.document_name}
-                                </button>
-                              );
-                            }
-                            return <span></span>;
-                          })}
-                        </article>
+                          <div
+                            className={`${styles.all__search__result__main}`}
+                          >
+                            <article
+                              className={`${styles.all__search__result__opts}`}
+                            >
+                              {filterDocs.map((doc, ind) => {
+                                if (doc) {
+                                  return (
+                                    <button
+                                      key={ind}
+                                      className={`${styles.all__search__result__btn} `}
+                                      id={doc._id}
+                                      onClick={() => handleSearchItemClick(doc)}
+                                    >
+                                      {doc.document_name}
+                                    </button>
+                                  );
+                                }
+                                return <span></span>;
+                              })}
+                            </article>
 
-                        <article
-                          className={`${styles.all__search__result__opts}`}
-                        >
-                          {filterTemps.map((temp, ind) => {
-                            if (temp) {
-                              return (
-                                <button
-                                  key={ind}
-                                  className={`${styles.all__search__result__btn} `}
-                                  id={temp._id}
-                                  onClick={() => handleSearchItemClick(temp)}
-                                >
-                                  {temp.template_name}
-                                </button>
-                              );
-                            }
-                            return <span></span>;
-                          })}
-                        </article>
+                            <article
+                              className={`${styles.all__search__result__opts}`}
+                            >
+                              {filterTemps.map((temp, ind) => {
+                                if (temp) {
+                                  return (
+                                    <button
+                                      key={ind}
+                                      className={`${styles.all__search__result__btn} `}
+                                      id={temp._id}
+                                      onClick={() =>
+                                        handleSearchItemClick(temp)
+                                      }
+                                    >
+                                      {temp.template_name}
+                                    </button>
+                                  );
+                                }
+                                return <span></span>;
+                              })}
+                            </article>
 
-                        <article
-                          className={`${styles.all__search__result__opts}`}
-                        >
-                          {filterWorks.map((work, ind) => {
-                            if (work) {
-                              return (
-                                <button
-                                  key={ind}
-                                  className={`${styles.all__search__result__btn} `}
-                                  id={work._id}
-                                  onClick={() => handleSearchItemClick(work)}
-                                >
-                                  {work.workflows.workflow_title}
-                                </button>
-                              );
-                            }
-                            return <span></span>;
-                          })}
-                        </article>
-                      </div>
+                            <article
+                              className={`${styles.all__search__result__opts}`}
+                            >
+                              {filterWorks.map((work, ind) => {
+                                if (work) {
+                                  return (
+                                    <button
+                                      key={ind}
+                                      className={`${styles.all__search__result__btn} `}
+                                      id={work._id}
+                                      onClick={() =>
+                                        handleSearchItemClick(work)
+                                      }
+                                    >
+                                      {work.workflows.workflow_title}
+                                    </button>
+                                  );
+                                }
+                                return <span></span>;
+                              })}
+                            </article>
+                          </div>
+                        </>
+                      ) : (
+                        <DisplaySearch
+                          result={searchResultsToDisplay}
+                          handleSearchItemClick={handleSearchItemClick}
+                        />
+                      )}
                     </div>
                   ) : (
                     <>

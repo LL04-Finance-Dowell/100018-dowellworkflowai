@@ -18,8 +18,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import GeneratedLinksModal from './components/GeneratedLinksModal/GeneratedLinksModal';
 import SaveConfimationModal from './components/SaveConfirmationModal/SaveConfirmationModal';
-import { setAllProcesses } from '../../../../features/app/appSlice';
+import { setAllProcesses, setAllowErrorChecksStatusUpdateForNewProcess, setNewProcessErrorMessage } from '../../../../features/app/appSlice';
 import { useTranslation } from 'react-i18next';
+import { productName } from '../../../../utils/helpers';
 
 const ProcessDocument = ({ savedProcess }) => {
   // const [currentProcess, setCurrentProcess] = useState();
@@ -53,6 +54,7 @@ const ProcessDocument = ({ savedProcess }) => {
     publicMembersSelectedForProcess,
 
     allProcesses,
+    errorsCheckedInNewProcess,
   } = useSelector((state) => state.app);
   const [newProcessLoading, setNewProcessLoading] = useState(false);
   const [newProcessLoaded, setNewProcessLoaded] = useState(null);
@@ -72,10 +74,10 @@ const ProcessDocument = ({ savedProcess }) => {
 
   const extractProcessObj = (actionVal, skipDataChecks = false) => {
     const processObj = {
-      company_id: userDetail?.portfolio_info[0]?.org_id,
+      company_id: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_id : userDetail?.portfolio_info[0]?.org_id,
       created_by: userDetail?.userinfo?.username,
-      creator_portfolio: userDetail?.portfolio_info[0]?.portfolio_name,
-      data_type: userDetail?.portfolio_info[0].data_type,
+      creator_portfolio: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.portfolio_name : userDetail?.portfolio_info[0]?.portfolio_name,
+      data_type: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.data_type : userDetail?.portfolio_info[0]?.data_type,
       parent_id: currentDocToWfs?._id,
       action: actionVal,
       workflows: [
@@ -88,6 +90,7 @@ const ProcessDocument = ({ savedProcess }) => {
       ],
       workflows_ids: [docCurrentWorkflow._id], // this will be updated later to capture multiple workflows
       process_type: 'document',
+      org_name: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_name : userDetail?.portfolio_info[0]?.org_name,
     };
 
     const foundProcessSteps = processSteps.find(
@@ -257,10 +260,12 @@ const ProcessDocument = ({ savedProcess }) => {
       return toast.info('You have not selected any workflow');
     if (processSteps.length < 1)
       return toast.info('You have not configured steps for any workflow');
+    if (!errorsCheckedInNewProcess) return toast.info('Please click the "Show process" button above to make sure there are no errors before processing.');
 
     if (processOptionSelection === 'saveAndContinueLater') {
       const processObjToSave = extractProcessObj(processOptionSelection, true);
       setProcessObjectToSave(processObjToSave);
+      dispatch(setAllowErrorChecksStatusUpdateForNewProcess(true));
       return setShowConfirmationModalForSaveLater(true);
     }
 
@@ -268,7 +273,15 @@ const ProcessDocument = ({ savedProcess }) => {
       newProcessActionOptions[`${processOptionSelection}`]
     );
 
-    if (processObjToPost.error) return toast.info(processObjToPost.error);
+    if (processObjToPost.error) {
+      dispatch(setNewProcessErrorMessage(processObjToPost.error));
+      return toast.info(processObjToPost.error);
+    }
+
+    dispatch(setAllowErrorChecksStatusUpdateForNewProcess(true));
+    dispatch(setNewProcessErrorMessage(null));
+
+    if (!errorsCheckedInNewProcess) return toast.info('Please click the "Show process" button above to make sure there are no errors before processing.');
 
     console.log('New process obj to post: ', processObjToPost);
     setNewProcessLoading(true);
@@ -286,6 +299,7 @@ const ProcessDocument = ({ savedProcess }) => {
         console.log(response);
         setGeneratedLinks(response);
         setShowGeneratedLinksPopup(true);
+        setNewProcessLoaded(false);
         return;
       }
       toast.success(
@@ -293,6 +307,7 @@ const ProcessDocument = ({ savedProcess }) => {
           ? response
           : 'Successfully created new process'
       );
+      setNewProcessLoaded(false);
     } catch (err) {
       console.log(err.response ? err.response.data : err.message);
       setNewProcessLoading(false);
@@ -408,6 +423,7 @@ const ProcessDocument = ({ savedProcess }) => {
     }
 
     dispatch(setAllProcesses(copyOfProcesses));
+    dispatch(setAllowErrorChecksStatusUpdateForNewProcess(false));
     toast.success('Successfully saved process');
     navigate('/processes/#drafts');
   };
@@ -415,7 +431,7 @@ const ProcessDocument = ({ savedProcess }) => {
   return (
     <>
       <div className={styles.container}>
-        <h2 className={`h2-small step-title align-left ${styles.header}`}>
+        <h2 className={styles.h2__Doc__Title}>
           5. {t('Process Document')}
         </h2>
         <div className={styles.box}>

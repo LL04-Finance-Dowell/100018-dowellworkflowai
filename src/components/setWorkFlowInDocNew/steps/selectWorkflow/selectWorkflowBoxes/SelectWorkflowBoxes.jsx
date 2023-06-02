@@ -12,6 +12,7 @@ import {
   setSelectedMembersForProcess,
   setSelectedWorkflowsToDoc,
 } from '../../../../../features/app/appSlice';
+import { useAppContext } from '../../../../../contexts/AppContext';
 import Collapse from '../../../../../layouts/collapse/Collapse';
 import { LoadingSpinner } from '../../../../LoadingSpinner/LoadingSpinner';
 import { useForm } from 'react-hook-form';
@@ -26,6 +27,7 @@ import {
 import { allWorkflows } from '../../../../../features/workflow/asyncTHunks';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { productName } from '../../../../../utils/helpers';
 
 const InfoBoxes = ({ savedDoc }) => {
   const { register, watch } = useForm();
@@ -46,13 +48,13 @@ const InfoBoxes = ({ savedDoc }) => {
   const { allWorkflows: allWorkflowsArray, allWorkflowsStatus } = useSelector(
     (state) => state.workflow
   );
-
+  const {  isMobile } =useAppContext();
   const [compInfoBoxes, setCompInfoBoxes] = useState(infoBoxes);
 
   useEffect(() => {
     const data = {
-      company_id: userDetail?.portfolio_info[0].org_id,
-      data_type: userDetail?.portfolio_info[0].data_type,
+      company_id: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_id : userDetail?.portfolio_info[0].org_id,
+      data_type: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.data_type : userDetail?.portfolio_info[0].data_type,
     };
 
     dispatch(allWorkflows(data));

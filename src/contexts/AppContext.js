@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { WorkflowSettingServices } from '../services/workflowSettingServices';
 import { useMediaQuery } from 'react-responsive';
+import { productName } from '../utils/helpers';
 
 const AppContext = createContext({});
 
@@ -10,6 +11,9 @@ export const useAppContext = () => useContext(AppContext);
 export const AppContextProvider = ({ children }) => {
   const isDesktop = useMediaQuery({
     query: '(min-width: 1050px)',
+  });
+  const isMobile = useMediaQuery({
+    query: '(max-width: 767px)',
   });
   const [nonDesktopStyles] = useState({
     gap: '0',
@@ -99,8 +103,13 @@ export const AppContextProvider = ({ children }) => {
   };
 
   const fetchSettings = async () => {
+    const userCompanyId = userDetail?.portfolio_info?.length > 1 ? 
+      userDetail?.portfolio_info?.find(portfolio => portfolio.product === productName)?.org_id
+    :
+    userDetail?.portfolio_info[0]?.org_id;
+
     const res = await new WorkflowSettingServices().fetchWorkflowSettings(
-      userDetail?.portfolio_info[0]?.org_id
+      userCompanyId
     );
 
     setWorkflowSettings(res.data);
@@ -112,8 +121,13 @@ export const AppContextProvider = ({ children }) => {
       if (!workflowTeamsLoaded) {
         //* Fetching workflow teams
         const settingService = new WorkflowSettingServices();
+        const userCompanyId = userDetail?.portfolio_info?.length > 1 ? 
+          userDetail?.portfolio_info?.find(portfolio => portfolio.product === productName)?.org_id
+        :
+        userDetail?.portfolio_info[0]?.org_id;
+
         settingService
-          .getAllTeams(userDetail?.portfolio_info[0]?.org_id)
+          .getAllTeams(userCompanyId)
           .then((res) => {
             setWorkflowTeams(res.data);
             setWorkflowTeamsLoaded(true);
@@ -136,9 +150,9 @@ export const AppContextProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userDetail]);
 
-  useEffect(() => {
-    console.log('wrkf settings: ', workflowSettings);
-  }, [workflowSettings]);
+  // useEffect(() => {
+  //   console.log('wrkf settings: ', workflowSettings);
+  // }, [workflowSettings]);
 
   return (
     <AppContext.Provider
@@ -184,6 +198,7 @@ export const AppContextProvider = ({ children }) => {
         nameChangeTitle,
         setNameChangeTitle,
         isDesktop,
+        isMobile,
         nonDesktopStyles,
         customDocName,
         customTempName,

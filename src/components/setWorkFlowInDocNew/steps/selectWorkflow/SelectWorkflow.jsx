@@ -1,5 +1,6 @@
 import styles from './selectWorkflow.module.css';
 import SelectWorkflowBoxes from './selectWorkflowBoxes/SelectWorkflowBoxes';
+import { useAppContext } from '../../../../contexts/AppContext';
 
 import { useDispatch, useSelector } from 'react-redux';
 import SelectedWorkflows from './selectedWorkflow/SelectedWorkflows';
@@ -14,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 const SelectWorkflow = ({ savedDoc }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { isMobile } = useAppContext();
 
   const { currentDocToWfs } = useSelector((state) => state.app);
 
@@ -34,7 +36,7 @@ const SelectWorkflow = ({ savedDoc }) => {
 
   return (
     <div className={styles.container}>
-      <h2 className={`${styles.title} h2-small step-title align-left`}>
+      <h2 className={`${styles.title} ${styles.h2__Doc__Title} h2-small step-title align-left`}>
         2. {t('Select a Workflow to add to the selected documents')}
       </h2>
       <div className={styles.content__box}>
@@ -52,7 +54,7 @@ const SelectWorkflow = ({ savedDoc }) => {
             }}
             darkBgOnHover={true}
           >
-            {t('Add Selected Workflows to document')}
+            {isMobile ? 'Add' : t('Add Selected Workflows to document')}
           </PrimaryButton>
           <PrimaryButton
             onClick={handleRemove}
@@ -60,10 +62,10 @@ const SelectWorkflow = ({ savedDoc }) => {
             disabled={savedDoc ? true : false}
             style={{
               cursor: savedDoc ? 'not-allowed' : 'pointer',
-              width: '70%',
             }}
+            className={styles.btnsuces}
           >
-            {t('Remove Selected Workflows from document')}
+            {isMobile ? 'Remove' : t('Remove Selected Workflows from document')}
           </PrimaryButton>
         </div>
       </div>

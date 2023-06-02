@@ -20,9 +20,11 @@ import {
   setLanguageSelectPosition,
 } from '../../features/app/appSlice';
 import { AiOutlineClose } from 'react-icons/ai';
+import { RxHamburgerMenu } from "react-icons/rx";
+import { IoIosCloseCircle } from "react-icons/io";
 import { LoadingSpinner } from '../../components/LoadingSpinner/LoadingSpinner';
 import Chat from '../../components/Chat/Chat'
-import { formatDateAndTime } from '../../utils/helpers';
+import { formatDateAndTime, productName } from '../../utils/helpers';
 import { workflowRegistrationEventId } from '../../services/legalService';
 import { AuthServices } from '../../services/authServices';
 import { updateUserDetail } from '../../features/auth/authSlice';
@@ -36,7 +38,8 @@ import LanguageDropdown from '../../components/LanguageSelector/LanguageDropdown
 const WorkflowLayout = ({ children }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  // console.log({t})
+  const { workflowTeams, isDesktop, nonDesktopStyles, isMobile } = useAppContext();
+
   const { userDetail, session_id, id } = useSelector((state) => state.auth);
   const {
     userDetailPosition,
@@ -53,6 +56,7 @@ const WorkflowLayout = ({ children }) => {
 
   const [createNewPortfolioLoading, setCreateNewPortfolioLoading] =
     useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { allDocuments } = useSelector((state) => state.document);
   const { allTemplates } = useSelector((state) => state.template);
   const { allWorkflows } = useSelector((state) => state.workflow);
@@ -101,10 +105,21 @@ const WorkflowLayout = ({ children }) => {
       return;
 
     if (!processesLoaded) {
+      const [ userCompanyId, userPortfolioDataType ] = [
+        userDetail?.portfolio_info?.length > 1 ? 
+          userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_id
+          :
+        userDetail?.portfolio_info[0]?.org_id
+        ,
+        userDetail?.portfolio_info?.length > 1 ? 
+          userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.data_type
+          :
+        userDetail?.portfolio_info[0]?.data_type
+      ];
       // Fetching processes
       getAllProcessesV2(
-        userDetail?.portfolio_info[0]?.org_id,
-        userDetail?.portfolio_info[0]?.data_type
+        userCompanyId,
+        userPortfolioDataType
       )
         .then((res) => {
           const savedProcessesInLocalStorage = JSON.parse(
@@ -202,6 +217,10 @@ const WorkflowLayout = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allDocuments, allTemplates, allWorkflows, searchItemsStatus]);
 
+  function toggleSidebar() {
+    setIsSidebarOpen(!isSidebarOpen);
+  }
+
   return (
     <>
       <div className={styles.container}>
@@ -233,12 +252,29 @@ const WorkflowLayout = ({ children }) => {
           ) : (
             <>
               <div className={styles.content__box}>
-                <div className={`${styles.sidebar__box} hide-scrollbar`}>
-                  <SideBar />
-                </div>
+                {isMobile ? (
+                  <>
+                    <div className={`${styles.sidebar__box} hide-scrollbar`} style={{ display: isSidebarOpen ? 'block' : 'none' }}>
+                      <SideBar />
+                    </div>
+                    <div style={{ position: 'fixed', top: 2, left: 0 }}>
+                      {isSidebarOpen ? (
+                        <IoIosCloseCircle size={40} onClick={toggleSidebar} />
+                      ) : (
+                        <RxHamburgerMenu color='black' size={30} onClick={toggleSidebar} />
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className={`${styles.sidebar__box} hide-scrollbar`}>
+                    <SideBar />
+                  </div>
+                )}
+
                 <div className={styles.children__box}>
                   {children}
                 </div>
+
                 <Chat />
               </div>
               <Editor />
@@ -268,7 +304,7 @@ const WorkflowLayout = ({ children }) => {
         {/* /////////// */}
         {userDetailPosition && (
           <div
-            onMouseEnter={handleMouseEnter}
+            onClick={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             style={{
               position: 'fixed',

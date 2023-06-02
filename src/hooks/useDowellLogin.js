@@ -8,6 +8,7 @@ import { useAppContext } from '../contexts/AppContext';
 import { setShowProfileSpinner } from '../features/app/appSlice';
 import { AuthServices } from '../services/authServices';
 import { toast } from 'react-toastify';
+import { productName } from '../utils/helpers';
 
 export default function useDowellLogin() {
   const dispatch = useDispatch();
@@ -33,10 +34,12 @@ export default function useDowellLogin() {
     
     if (passedId) {
       navigate(`/?session_id=${passedSessionId}&id=${passedId}`)
+      window.history.replaceState({}, document.title, "/workflowai.online/");
       return
     }
 
     navigate(`/?session_id=${passedSessionId}`);
+    window.history.replaceState({}, document.title, "/workflowai.online/");
   }
 
   const extractTokenFromURLAndNavigateToVerificationPage = (url, session_id, id=null, detailsConfigured=false) => {
@@ -66,6 +69,7 @@ export default function useDowellLogin() {
     if (!token) {
       dispatch(setShowProfileSpinner(false));
       navigate(`/?session_id=${session_id}`)
+      window.history.replaceState({}, document.title, "/workflowai.online/");
       return;
     }
 
@@ -78,8 +82,13 @@ export default function useDowellLogin() {
         window.sessionStorage.setItem("userDetail", JSON.stringify(fetchedUserDetails));
         dispatch(updateUserDetail(fetchedUserDetails));
 
+        const userPortfolioName = fetchedUserDetails?.portfolio_info?.length > 1 ? 
+          fetchedUserDetails?.portfolio_info.find(portfolio => portfolio.product === productName)?.portfolio_name
+          :
+        fetchedUserDetails?.portfolio_info[0]?.portfolio_name;
+
         // confirming the user's portfolio matches
-        if (portfolio !== fetchedUserDetails?.portfolio_info[0]?.portfolio_name) {
+        if (portfolio !== userPortfolioName) {
           handleUnauthorizedVerificationAccess(fetchedUserDetails, session_id, id);
           return
         }
@@ -123,6 +132,7 @@ export default function useDowellLogin() {
     const session_id = searchParams.get('session_id');
     const id = searchParams.get('id');
     const userType = searchParams.get('user_type');
+    const currentLocation = window.location.href;
 
     if (userType && userType === 'public') {
       setIsPublicUser(true);
@@ -134,7 +144,7 @@ export default function useDowellLogin() {
 
     if (session_id) {
       // remove session_id and/or id from url
-      // window.history.replaceState({}, document.title, "/workflowai.online/");
+      window.history.replaceState({}, document.title, "/workflowai.online/");
 
       sessionStorage.clear();
 
@@ -142,10 +152,10 @@ export default function useDowellLogin() {
       dispatch(setSessionId(session_id));
       if (id || localId) {
         dispatch(setId(id));
-        if (window.location.href.includes('token~') && window.location.href.includes('userDetailsConfigured~')) return extractTokenFromURLAndNavigateToVerificationPage(window.location.href, session_id, id, true)
+        if (currentLocation.includes('token~') && currentLocation.includes('userDetailsConfigured~')) return extractTokenFromURLAndNavigateToVerificationPage(currentLocation, session_id, id, true)
         dispatch(getUserInfoOther({ session_id }));
       } else {
-        if (window.location.href.includes('token~') && !window.location.href.includes('userDetailsConfigured~')) return extractTokenFromURLAndNavigateToVerificationPage(window.location.href, session_id)
+        if (currentLocation.includes('token~') && !currentLocation.includes('userDetailsConfigured~')) return extractTokenFromURLAndNavigateToVerificationPage(currentLocation, session_id)
         dispatch(getUserInfo({ session_id }));
       }
     }
