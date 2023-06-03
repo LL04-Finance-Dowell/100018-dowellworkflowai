@@ -70,7 +70,7 @@ const VerificationPage = () => {
       try {
         auth_users = JSON.parse(paramsPassed.getAll('username')[0].replaceAll("'", '"'));        
       } catch (error) {
-        auth_users = []
+        auth_users = [auth_username]
       }
 
       if (
