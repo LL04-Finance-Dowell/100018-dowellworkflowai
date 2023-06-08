@@ -28,6 +28,10 @@ import {
   updateVerificationDataWithTimezone 
 } from '../../../utils/helpers';
 import { useTranslation } from 'react-i18next';
+import { DocumentServices } from '../../../services/documentServices';
+import { MdOutlineFiberNew } from 'react-icons/md';
+import { IoIosRefresh } from 'react-icons/io';
+import { Tooltip } from 'react-tooltip';
 
 const DocumentCard = ({
   cardItem,
@@ -48,6 +52,7 @@ const DocumentCard = ({
     setIsNoPointerEvents,
   } = useAppContext();
   const { allDocuments } = useSelector((state) => state.document);
+  const [ documentLoading, setDocumentLoading ] = useState(false);
 
   const handleFavoritess = async (item, actionType) => {
     /*  const data = {
@@ -98,7 +103,7 @@ const DocumentCard = ({
         });
       }
     }
-    // console.log(favoriteItems)
+   
   };
 
   const handleTrashDocument = async (cardItem) => {
@@ -121,7 +126,7 @@ const DocumentCard = ({
       ).data;
       toast.success(response);
     } catch (error) {
-      console.log(error.response ? error.response.data : error.message);
+    
       copyOfDocumentToUpdate.data_type = 'Real_Data';
       copyOfAllDocuments[foundDocumentIndex] = copyOfDocumentToUpdate;
       dispatch(setAllDocuments(copyOfAllDocuments));
@@ -130,6 +135,7 @@ const DocumentCard = ({
 
   const handleDetailDocumnet = async (item) => {
     if (dataLoading) return;
+    if (documentLoading) return toast.info("Please wait for this document to be refreshed first");
     if (item.type === 'sign-document') {
       setDataLoading(true);
       try {
@@ -143,7 +149,7 @@ const DocumentCard = ({
         ).data;
 
         /*  dispatch(setEditorLink(response)); */
-        console.log('responseee', response);
+       
         // setDataLoading(false);
         handleGoToEditor(response);
       } catch (error) {
@@ -192,7 +198,7 @@ const DocumentCard = ({
       const paramsPassed = new URL(shortenedLinkToExtractParamsFrom)
         .searchParams;
 
-      // console.log(paramsPassed);
+      
 
       const auth_username = paramsPassed.get('username');
       const auth_portfolio = paramsPassed.get('portfolio');
@@ -222,7 +228,7 @@ const DocumentCard = ({
       delete sanitizedDataToPost.user_name;
       delete sanitizedDataToPost.portfolio;
 
-      // console.log(sanitizedDataToPost)
+      
       // return setDataLoading(false);
     }
 
@@ -245,9 +251,56 @@ const DocumentCard = ({
     }
   };
 
+  const handleFetchNewDocumentDetail = async (documentId) => {
+    if (documentLoading) return;
+    if (dataLoading) return toast.info("Please wait for this document to open first");
+
+    const copyOfAllDocuments = [...allDocuments];
+    const foundDocumentIndex = copyOfAllDocuments.findIndex(
+      (item) => item._id === documentId
+    );
+
+    if (foundDocumentIndex === -1) return;
+
+    setDocumentLoading(true);
+
+    try {
+      const documentService = new DocumentServices();
+      const response = (await documentService.singleDocumentDetail(documentId)).data;
+      
+      copyOfAllDocuments[foundDocumentIndex] = response;
+      dispatch(setAllDocuments(copyOfAllDocuments));
+
+      setDocumentLoading(false);
+    } catch (error) {
+      console.log(error.response ? error.response.data : error.message);
+      toast.info('Refresh for document failed');
+      setDocumentLoading(false);
+    }
+  }
+
   const FrontSide = () => {
     return (
-      <div>{cardItem.document_name ? cardItem.document_name : 'no item'}</div>
+      <div>
+        { 
+          cardItem.newly_created && 
+          <div
+            style={{
+              position: 'absolute',
+              left: '10px',
+              top: '0',
+              fontSize: '1.5rem',
+              color: '#ff0000'
+            }}
+          >
+            <MdOutlineFiberNew />
+          </div>
+        }
+        {
+          cardItem.document_name ? cardItem.document_name : 
+          'no item'
+        }
+      </div>
     );
   };
 
@@ -308,10 +361,55 @@ const DocumentCard = ({
             <RiDeleteBin6Line color='red' />
           </div>
         )}
+        { 
+          cardItem.newly_created && 
+          <div
+            style={{
+              position: 'absolute',
+              left: '10px',
+              top: '0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <div 
+              id={cardItem._id}
+              style={{
+                color: '#ff0000',
+                fontSize: '1.5rem',
+              }}
+            >
+              <MdOutlineFiberNew />
+              <Tooltip 
+                anchorId={cardItem._id} 
+                content={'This is a new document. Refresh right here to see its actual title'} 
+                style={{ 
+                  fontStyle: "normal",
+                  fontSize: '0.7rem',
+                  width: '8rem',
+                  wordWrap: 'break-word'
+                }} 
+              />
+            </div>
+            <div
+              style={{
+                fontSize: '0.7rem',
+                cursor: 'pointer',
+              }}  
+              onClick={() => handleFetchNewDocumentDetail(cardItem._id)}
+            >
+              {
+                !documentLoading ? <IoIosRefresh /> :
+                <LoadingSpinner color={'#000'} width={'0.7rem'} height={'0.7rem'} />
+              }
+            </div>
+          </div>
+        }
       </div>
     );
   };
-  return <HoverCard Front={FrontSide} Back={BackSide} loading={dataLoading} />;
+  return <HoverCard Front={FrontSide} Back={BackSide} loading={documentLoading ? documentLoading : dataLoading} />;
 };
 
 export default DocumentCard;

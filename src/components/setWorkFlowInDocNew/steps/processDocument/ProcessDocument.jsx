@@ -13,17 +13,21 @@ import {
   startNewProcessV2,
 } from '../../../../services/processServices';
 import ProgressBar from '../../../progressBar/ProgressBar';
-
+import SelectDoc from '../selectDoc/SelectDoc';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import GeneratedLinksModal from './components/GeneratedLinksModal/GeneratedLinksModal';
 import SaveConfimationModal from './components/SaveConfirmationModal/SaveConfirmationModal';
-import { setAllProcesses, setAllowErrorChecksStatusUpdateForNewProcess, setNewProcessErrorMessage } from '../../../../features/app/appSlice';
+import {
+  setAllProcesses,
+  setAllowErrorChecksStatusUpdateForNewProcess,
+  setNewProcessErrorMessage,
+} from '../../../../features/app/appSlice';
 import { useTranslation } from 'react-i18next';
-import { productName } from '../../../../utils/helpers';
+import { extractProcessObj } from './utils/utils';
 
 const ProcessDocument = ({ savedProcess }) => {
-  // const [currentProcess, setCurrentProcess] = useState();
+  // const [ScrollView , SetScrollView] = useState();
 
   // useEffect(() => {
   //   setCurrentProcess(processDocument[0]);
@@ -31,7 +35,7 @@ const ProcessDocument = ({ savedProcess }) => {
 
   useEffect(() => {
     if (!savedProcess) return;
-    // console.log(savedProcess);
+
     setProcessObjectToSaveTitle(savedProcess.process_title);
   }, [savedProcess]);
 
@@ -72,223 +76,79 @@ const ProcessDocument = ({ savedProcess }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const extractProcessObj = (actionVal, skipDataChecks = false) => {
-    const processObj = {
-      company_id: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_id : userDetail?.portfolio_info[0]?.org_id,
-      created_by: userDetail?.userinfo?.username,
-      creator_portfolio: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.portfolio_name : userDetail?.portfolio_info[0]?.portfolio_name,
-      data_type: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.data_type : userDetail?.portfolio_info[0]?.data_type,
-      parent_id: currentDocToWfs?._id,
-      action: actionVal,
-      workflows: [
-        {
-          workflows: {
-            workflow_title: docCurrentWorkflow.workflows?.workflow_title,
-            steps: [],
-          },
-        },
-      ],
-      workflows_ids: [docCurrentWorkflow._id], // this will be updated later to capture multiple workflows
-      process_type: 'document',
-      org_name: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_name : userDetail?.portfolio_info[0]?.org_name,
-    };
-
-    const foundProcessSteps = processSteps.find(
-      (process) => process.workflow === docCurrentWorkflow._id
-    );
-    const tableOfContents = tableOfContentForStep.filter(
-      (content) => content.workflow === docCurrentWorkflow._id
-    );
-
-    processObj.workflows[0].workflows.steps = foundProcessSteps
-      ? foundProcessSteps.steps.map((step, currentIndex) => {
-          let copyOfCurrentStep = { ...step };
-          if (copyOfCurrentStep._id) delete copyOfCurrentStep._id;
-          if (copyOfCurrentStep.toggleContent)
-            delete copyOfCurrentStep.toggleContent;
-
-          if (copyOfCurrentStep.step_name) {
-            copyOfCurrentStep.stepName = copyOfCurrentStep.step_name;
-            delete copyOfCurrentStep.step_name;
-          }
-
-          if (copyOfCurrentStep.role) {
-            copyOfCurrentStep.stepRole = copyOfCurrentStep.role;
-            delete copyOfCurrentStep.role;
-          }
-
-          copyOfCurrentStep.stepPublicMembers = publicMembersSelectedForProcess
-            .filter((selectedUser) => selectedUser.stepIndex === currentIndex)
-            .map((user) => {
-              const copyOfUserItem = { ...user };
-              if (Array.isArray(copyOfUserItem.member))
-                copyOfUserItem.member = copyOfUserItem.member[0];
-              delete copyOfUserItem.stepIndex;
-
-              return copyOfUserItem;
-            });
-
-          copyOfCurrentStep.stepTeamMembers = teamMembersSelectedForProcess
-            .filter((selectedUser) => selectedUser.stepIndex === currentIndex)
-            .map((user) => {
-              const copyOfUserItem = { ...user };
-              if (Array.isArray(copyOfUserItem.member))
-                copyOfUserItem.member = copyOfUserItem.member[0];
-              delete copyOfUserItem.stepIndex;
-
-              return copyOfUserItem;
-            });
-
-          copyOfCurrentStep.stepUserMembers = userMembersSelectedForProcess
-            .filter((selectedUser) => selectedUser.stepIndex === currentIndex)
-            .map((user) => {
-              const copyOfUserItem = { ...user };
-              if (Array.isArray(copyOfUserItem.member))
-                copyOfUserItem.member = copyOfUserItem.member[0];
-              delete copyOfUserItem.stepIndex;
-
-              return copyOfUserItem;
-            });
-
-          copyOfCurrentStep.stepDocumentCloneMap = [];
-
-          copyOfCurrentStep.stepNumber = currentIndex + 1;
-          copyOfCurrentStep.stepDocumentMap = tableOfContents
-            .filter((content) => content.stepIndex === currentIndex)
-            .map((content) => ({
-              content: content.id,
-              required: content.required,
-              page: content.page,
-            }));
-
-          if (!copyOfCurrentStep.permitInternalWorkflow)
-            copyOfCurrentStep.permitInternalWorkflow = false;
-          if (!copyOfCurrentStep.skipStep) copyOfCurrentStep.skipStep = false;
-          if (!copyOfCurrentStep.stepLocation)
-            copyOfCurrentStep.stepLocation = 'any';
-
-          if (copyOfCurrentStep.skipStep) {
-            copyOfCurrentStep.stepCloneCount = 0;
-            copyOfCurrentStep.stepDisplay = 'in_all_steps';
-            copyOfCurrentStep.stepProcessingOrder = 'no_order';
-            copyOfCurrentStep.stepRights = 'add_edit';
-            copyOfCurrentStep.stepActivityType = 'individual_task';
-          }
-          return copyOfCurrentStep;
-        })
-      : [];
-
-    if (skipDataChecks) return processObj;
-
-    const requiredFieldKeys = Object.keys(requiredProcessStepsKeys);
-
-    const pendingFieldsToFill = requiredFieldKeys.map((requiredKey) => {
-      if (
-        processObj.workflows[0].workflows.steps.every((step) =>
-          step.hasOwnProperty(requiredKey)
-        )
-      )
-        return null;
-      return 'field missing';
-    });
-
-    if (pendingFieldsToFill.find((field) => field === 'field missing'))
-      return {
-        error: `Please make sure you ${
-          requiredProcessStepsKeys[
-            requiredFieldKeys[
-              pendingFieldsToFill.findIndex(
-                (field) => field === 'field missing'
-              )
-            ]
-          ]
-        } for each step`,
-      };
-
-    const membersMissingInStep = processObj.workflows[0].workflows.steps.map(
-      (step) => {
-        if (
-          step.stepPublicMembers.length < 1 &&
-          step.stepTeamMembers.length < 1 &&
-          step.stepUserMembers.length < 1 &&
-          !step.skipStep
-        )
-          return 'Please assign at least one user for each step';
-        return null;
-      }
-    );
-
-    if (
-      membersMissingInStep.find(
-        (member) => member === 'Please assign at least one user for each step'
-      )
-    )
-      return {
-        error: membersMissingInStep.find(
-          (member) => member === 'Please assign at least one user for each step'
-        ),
-      };
-
-    const documentMapMissingInStep =
-      processObj.workflows[0].workflows.steps.map((step) => {
-        if (step.stepDocumentMap.length < 1 && !step.skipStep)
-          return 'Document map missing';
-        return null;
-      });
-
-    if (
-      documentMapMissingInStep.find(
-        (stepMissing) => stepMissing === 'Document map missing'
-      )
-    )
-      return {
-        error:
-          'Please make sure you select at least one item from the table of contents for each step',
-      };
-
-    // if (!processObj.workflows[0].workflows.steps.every(step => step.stepDocumentMap.length > 0)) return { error : "Please make sure you select at least one item from the table of contents for each step" };
-
-    return processObj;
-  };
-
   const handleProcessBtnClick = async () => {
     if (!processOptionSelection || processOptionSelection === 'Select') return;
 
     if (!userDetail) return;
-    if (!currentDocToWfs) return toast.info('You have not selected a document');
-    if (!docCurrentWorkflow)
+    if (!currentDocToWfs) {
+      document.querySelector('.select-doc').scrollIntoView({ block: 'center' })
+      return toast.info('You have not selected a document');
+
+    };
+    if (!docCurrentWorkflow) {
+      document.querySelector('.step-title').scrollIntoView({ block: 'center' });
       return toast.info('You have not selected any workflow');
-    if (processSteps.length < 1)
-      return toast.info('You have not configured steps for any workflow');
-    if (!errorsCheckedInNewProcess) return toast.info('Please click the "Show process" button above to make sure there are no errors before processing.');
+    }
+    if (processSteps.length < 1) {
+
+      return toast.info('You have not configured steps for any workflow')
+    }
+    if (!errorsCheckedInNewProcess) {
+      document.querySelector('.h2__Doc__Title').scrollIntoView({ block: 'center' })
+      return toast.info('Please click the "Show process" button above to make sure there are no errors before processing.');
+    }
+
+
 
     if (processOptionSelection === 'saveAndContinueLater') {
-      const processObjToSave = extractProcessObj(processOptionSelection, true);
+      const processObjToSave = extractProcessObj(
+        processOptionSelection,
+        userDetail,
+        currentDocToWfs,
+        docCurrentWorkflow,
+        processSteps,
+        tableOfContentForStep,
+        teamMembersSelectedForProcess,
+        publicMembersSelectedForProcess,
+        userMembersSelectedForProcess,
+        true
+      );
       setProcessObjectToSave(processObjToSave);
       dispatch(setAllowErrorChecksStatusUpdateForNewProcess(true));
       return setShowConfirmationModalForSaveLater(true);
     }
 
     const processObjToPost = extractProcessObj(
-      newProcessActionOptions[`${processOptionSelection}`]
+      newProcessActionOptions[`${processOptionSelection}`],
+      userDetail,
+      currentDocToWfs,
+      docCurrentWorkflow,
+      processSteps,
+      tableOfContentForStep,
+      teamMembersSelectedForProcess,
+      publicMembersSelectedForProcess,
+      userMembersSelectedForProcess
     );
 
     if (processObjToPost.error) {
       dispatch(setNewProcessErrorMessage(processObjToPost.error));
+      document.querySelector('.h2__Doc__Title').scrollIntoView({ block: 'center' })
+
       return toast.info(processObjToPost.error);
     }
 
     dispatch(setAllowErrorChecksStatusUpdateForNewProcess(true));
     dispatch(setNewProcessErrorMessage(null));
 
-    if (!errorsCheckedInNewProcess) return toast.info('Please click the "Show process" button above to make sure there are no errors before processing.');
+    if (!errorsCheckedInNewProcess)
+      return toast.info(
+        'Please click the "Show process" button above to make sure there are no errors before processing.'
+      );
 
-    console.log('New process obj to post: ', processObjToPost);
     setNewProcessLoading(true);
 
     try {
       const response = await (await startNewProcessV2(processObjToPost)).data;
-      // console.log("process response: ", response);
       setNewProcessLoaded(true);
       setNewProcessLoading(false);
       if (
@@ -296,7 +156,6 @@ const ProcessDocument = ({ savedProcess }) => {
           newProcessActionOptions[`${processOptionSelection}`]
         )
       ) {
-        console.log(response);
         setGeneratedLinks(response);
         setShowGeneratedLinksPopup(true);
         setNewProcessLoaded(false);
@@ -309,7 +168,6 @@ const ProcessDocument = ({ savedProcess }) => {
       );
       setNewProcessLoaded(false);
     } catch (err) {
-      console.log(err.response ? err.response.data : err.message);
       setNewProcessLoading(false);
       toast.info(
         err.response
@@ -322,7 +180,7 @@ const ProcessDocument = ({ savedProcess }) => {
   };
 
   const handleSaveForLaterBtnClick = () => {
-    console.log('Process obj: ', processObjToSave);
+
     const processObjToSaveCopy = structuredClone(processObjToSave);
 
     processObjToSaveCopy._id = savedProcess
@@ -346,7 +204,7 @@ const ProcessDocument = ({ savedProcess }) => {
     delete processObjToSaveCopy.parent_id;
     delete processObjToSaveCopy.workflows_ids;
 
-    console.log('New process obj to save: ', processObjToSaveCopy);
+
 
     // saving to local storage
     const savedProcessesInLocalStorage = JSON.parse(
@@ -431,9 +289,7 @@ const ProcessDocument = ({ savedProcess }) => {
   return (
     <>
       <div className={styles.container}>
-        <h2 className={styles.h2__Doc__Title}>
-          5. {t('Process Document')}
-        </h2>
+        <h2 className={styles.h2__Doc__Title}>5. {t('Process Document')}</h2>
         <div className={styles.box}>
           <div className={styles.box__inner}>
             <h3 className={styles.box__header}>
@@ -453,7 +309,7 @@ const ProcessDocument = ({ savedProcess }) => {
               />
             ) : (
               <button hoverBg='success' onClick={handleProcessBtnClick}>
-                {t('Save / Start Proccess')}
+                {t('Save / Start Process')}
               </button>
             )}
           </div>
@@ -585,13 +441,3 @@ export const processDocument = [
   },
   { id: uuidv4(), process: 'Time limit', processDetail: 'Time limit' },
 ];
-
-const requiredProcessStepsKeys = {
-  stepCloneCount: 'select copies of document for processing',
-  stepDocumentMap: 'select at least one item from the table of contents',
-  stepDisplay: 'configure a display',
-  stepProcessingOrder: "select a 'member order'",
-  stepRights: "select a 'rights'",
-  stepActivityType: "select a 'activity type'",
-  stepLocation: 'configure a location',
-};

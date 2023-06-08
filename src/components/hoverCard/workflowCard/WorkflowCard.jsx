@@ -37,7 +37,7 @@ const WorkflowCard = ({ cardItem }) => {
   };
 
   const handleTrashWorkflow = async (cardItem) => {
-    // console.log(item)
+    
     const copyOfAllWorkflows = [...allWorkflows];
     const foundWorkflowIndex = copyOfAllWorkflows.findIndex(
       (item) => item._id === cardItem._id
@@ -60,7 +60,13 @@ const WorkflowCard = ({ cardItem }) => {
       toast.success(response);
     } catch (error) {
       console.log(error.response ? error.response.data : error.message);
-      toast.info(error.response ? error.response.data : error.message);
+      toast.info(
+        error.response
+            ? error.response.status === 500
+              ? 'Workflow archiving failed'
+              : error.response.data
+            : 'Workflow archiving failed'
+      );
       copyOfWorkflowsObj.data_type = 'Real_Data';
       copyOfWorkflowToUpdate.workflows = copyOfWorkflowsObj;
       copyOfAllWorkflows[foundWorkflowIndex] = copyOfWorkflowToUpdate;
@@ -114,7 +120,6 @@ const WorkflowCard = ({ cardItem }) => {
         );
       }
     }
-    // console.log(favoriteItems)
   };
 
   const FrontSide = () => {

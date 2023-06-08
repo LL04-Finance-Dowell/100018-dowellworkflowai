@@ -54,7 +54,7 @@ const VerificationPage = () => {
       const paramsPassed = new URL(shortenedLinkToExtractParamsFrom)
         .searchParams;
 
-      // console.log(paramsPassed);
+      
 
       const auth_username = paramsPassed.get('username');
       const auth_portfolio = paramsPassed.get('portfolio');
@@ -70,7 +70,7 @@ const VerificationPage = () => {
       try {
         auth_users = JSON.parse(paramsPassed.getAll('username')[0].replaceAll("'", '"'));        
       } catch (error) {
-        auth_users = []
+        auth_users = [auth_username]
       }
 
       if (
@@ -98,10 +98,10 @@ const VerificationPage = () => {
       delete sanitizedDataToPost.user_name;
       delete sanitizedDataToPost.portfolio;
 
-      // console.log(sanitizedDataToPost)
+      
       // return setDataLoading(false);
     }
-
+    
     if (dataIsPosting) return
 
     setDataIsPosting(true);
