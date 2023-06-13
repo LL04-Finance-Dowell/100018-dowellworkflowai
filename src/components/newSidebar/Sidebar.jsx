@@ -40,6 +40,7 @@ import { Tooltip } from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
 import { GrStatusGoodSmall } from 'react-icons/gr';
 import { productName } from '../../utils/helpers';
+import { api_url } from '../../httpCommon/httpCommon';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -192,7 +193,7 @@ const Sidebar = () => {
   useEffect(() => {
     axios
       .get(
-        'https://100094.pythonanywhere.com/v1/companies/6385c0f38eca0fb652c9457e/templates/?='
+        `${api_url}companies/6385c0f38eca0fb652c9457e/templates/?=`
       )
       .then((response) => {
         const templateNames = response.data.templates.map(
@@ -326,7 +327,7 @@ const Sidebar = () => {
         >
           {t('DoWell')} {t('Knowledge Center')}
         </h2>
-        <CollapseItem items={knowledge} />
+        <CollapseItem items={knowledge} exception={true} />
 
         <span className={styles.knowledge__Extra__Info}>
           {t('DoWell')} {t('True moments user experience lab')}
