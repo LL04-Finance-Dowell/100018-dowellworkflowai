@@ -72,7 +72,7 @@ function App() {
             },
           }
         )
-        .then((response) => {})
+        .then((response) => { })
         .catch((error) => {
           console.log(error);
           // Empty catch block
@@ -84,6 +84,7 @@ function App() {
   //     <Route path='*' element={<ConstructionPage />} />
   //   </Routes>
   // );
+
 
   if (isPublicUser)
     return (
