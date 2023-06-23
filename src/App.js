@@ -14,6 +14,9 @@ import NotificationsPage from './pages/Notifications/NotificationsPage';
 import TemplatesPage from './pages/Templates/AllTemplatesPage/TemplatesPage';
 import WorkflowsPage from './pages/Workflows/AllWorkflowsPage/WorkflowsPage';
 
+import FoldersPage from './pages/Folders/FoldersPage';
+import FolderPage from './pages/Folders/FolderPage';
+
 import SetWorkflowInDoc from './components/setWorkFlowInDoc/SetWorkflowInDoc';
 import SetWorkflowInDocNew from './components/setWorkFlowInDocNew/SetWorkflowInDoc';
 
@@ -105,7 +108,7 @@ function App() {
             path={'saved'}
             element={<DocumentsPage showOnlySaved={true} />}
           />
-          {/* <Route path={"trash"} element={<DocumentsPage showOnlyTrashed={true} />} /> */}
+          <Route path={"completed"} element={<DocumentsPage showOnlyCompleted={true} />} />
           {/*  <Route path={"new"} element={<CreateNewDocumentPage />} />
         <Route path={"to-sign"} element={<SignDocumentsPage />} />
         <Route path={"rejected"} element={<RejectedDocumentsPage />} />
@@ -161,6 +164,11 @@ function App() {
         </Route>
 
         <Route path={'/notifications'} element={<NotificationsPage />} />
+
+        <Route path={'/folders'}>
+          <Route index element={<FoldersPage />} />
+          <Route path={':folder_id'} element={<FolderPage />} />
+        </Route>
         {/* <Route path="/Documents/Documents/Documents" element={<Documents />} />
       <Route path="/Documents/DraftsDoc/DraftsDoc" element={<DraftsDoc />} />
       <Route path="/Templates/TempDraft/TempDraft" element={<TempDraft />} /> */}
