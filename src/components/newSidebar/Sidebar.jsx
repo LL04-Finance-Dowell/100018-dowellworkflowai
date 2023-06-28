@@ -40,7 +40,6 @@ import { Tooltip } from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
 import { GrStatusGoodSmall } from 'react-icons/gr';
 import { productName } from '../../utils/helpers';
-import { api_url } from '../../httpCommon/httpCommon';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -193,7 +192,7 @@ const Sidebar = () => {
   useEffect(() => {
     axios
       .get(
-        `${api_url}companies/6385c0f38eca0fb652c9457e/templates/?=`
+        'https://100094.pythonanywhere.com/v1/companies/6385c0f38eca0fb652c9457e/templates/?='
       )
       .then((response) => {
         const templateNames = response.data.templates.map(

@@ -40,12 +40,11 @@ function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       checkstatus();
-    }, 60000); // 60 seconds
+    }, 300000); // 5 mints
 
-    return () => clearInterval(interval); // Clean up the interval on unmount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => clearInterval(interval); 
   }, []);
-
+  // console.log('chk')
   function checkstatus() {
     // AJAX GET request
 
