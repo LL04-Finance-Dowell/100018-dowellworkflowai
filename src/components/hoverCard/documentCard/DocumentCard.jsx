@@ -40,6 +40,7 @@ const DocumentCard = ({
   hideFavoriteIcon,
   hideDeleteIcon,
   isFolder,
+  folderId,
 }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -55,7 +56,6 @@ const DocumentCard = ({
   } = useAppContext();
   const { allDocuments } = useSelector((state) => state.document);
   const [documentLoading, setDocumentLoading] = useState(false);
-
 
   const handleFavoritess = async (item, actionType) => {
     /*  const data = {
@@ -153,7 +153,7 @@ const DocumentCard = ({
         // setDataLoading(false);
         handleGoToEditor(response);
       } catch (error) {
-        console.log(error)
+        // console.log(error);
         setDataLoading(false);
         toast.info(
           error.response.status !== 500
@@ -170,7 +170,7 @@ const DocumentCard = ({
 
     const data = {
       document_name: item.document_name,
-      document_id: item._id ,
+      document_id: item._id,
     };
     dispatch(detailDocument(data.document_id));
   };
@@ -186,8 +186,8 @@ const DocumentCard = ({
       portfolio:
         userDetail?.portfolio_info?.length > 1
           ? userDetail?.portfolio_info.find(
-            (portfolio) => portfolio.product === productName
-          )?.portfolio_name
+              (portfolio) => portfolio.product === productName
+            )?.portfolio_name
           : userDetail?.portfolio_info[0]?.portfolio_name,
       city: userDetail?.userinfo?.city,
       country: userDetail?.userinfo?.country,
@@ -212,8 +212,8 @@ const DocumentCard = ({
       const currentUserPortfolioName =
         userDetail?.portfolio_info?.length > 1
           ? userDetail?.portfolio_info.find(
-            (portfolio) => portfolio.product === productName
-          )?.portfolio_name
+              (portfolio) => portfolio.product === productName
+            )?.portfolio_name
           : userDetail?.portfolio_info[0]?.portfolio_name;
 
       if (
@@ -243,7 +243,7 @@ const DocumentCard = ({
       setDataLoading(false);
       dispatch(setEditorLink(response));
     } catch (err) {
-      console.log(err.response ? err.response.data : err.message);
+      // console.log(err.response ? err.response.data : err.message);
       setDataLoading(false);
       toast.info(
         err.response
@@ -279,7 +279,7 @@ const DocumentCard = ({
 
       setDocumentLoading(false);
     } catch (error) {
-      console.log(error.response ? error.response.data : error.message);
+      // console.log(error.response ? error.response.data : error.message);
       toast.info('Refresh for document failed');
       setDocumentLoading(false);
     }
@@ -337,7 +337,7 @@ const DocumentCard = ({
             )}
           </div>
         )}
-        {cardItem._id || cardItem.item_id || cardItem['item_id:'] ? (
+        {cardItem._id ? (
           <Button onClick={() => handleDetailDocumnet(cardItem)}>
             {dataLoading ? (
               <LoadingSpinner />
@@ -425,7 +425,9 @@ const DocumentCard = ({
           }}
         >
           <AddRemoveBtn type={'add'} item={{ ...cardItem, type: 'document' }} />
-          {isFolder && <AddRemoveBtn type={'remove'} item={cardItem} />}
+          {isFolder && (
+            <AddRemoveBtn type={'remove'} item={cardItem} folderId={folderId} />
+          )}
         </div>
       </div>
     );
@@ -435,6 +437,7 @@ const DocumentCard = ({
       Front={FrontSide}
       Back={BackSide}
       loading={documentLoading ? documentLoading : dataLoading}
+      id={cardItem._id}
     />
   );
 };
