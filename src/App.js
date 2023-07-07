@@ -43,6 +43,7 @@ function App() {
     }, 300000); // 5 mints
 
     return () => clearInterval(interval); 
+    
   }, []);
 // console.log('chk')
   function checkstatus() {
