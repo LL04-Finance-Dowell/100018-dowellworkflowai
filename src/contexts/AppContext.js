@@ -9,6 +9,8 @@ import {
 } from '../features/app/appSlice';
 import { v4 } from 'uuid';
 import { FolderServices } from '../services/folderServices';
+import { TemplateServices } from '../services/templateServices';
+import { DocumentServices } from '../services/documentServices';
 
 const AppContext = createContext({});
 
@@ -52,7 +54,7 @@ export const AppContextProvider = ({ children }) => {
   // const [isFetchingTeams, setIsFetchingTeams] = useState(true);
   const [isNoPointerEvents, setIsNoPointerEvents] = useState(false);
   const [workflowTeamsLoaded, setWorkflowTeamsLoaded] = useState(false);
-  const [workflowSettings, setWorkflowSettings] = useState();
+  const [workflowSettings, setWorkflowSettings] = useState(null);
   const [fetchedItems, setFetchedItems] = useState([]);
 
   const { userDetail } = useSelector((state) => state.auth);
@@ -69,11 +71,16 @@ export const AppContextProvider = ({ children }) => {
   const [folders, setFolders] = useState([]);
   const [folderActionId, setFolderActionId] = useState('');
   const [isFetchingFolders, setIsFetchingFolders] = useState(false);
+  const [demoTemplates, setDemoTemplates] = useState(null);
+  const [demoDocuments, setDemoDocuments] = useState(null);
+  const [demoDocStatus, setDemoDocStatus] = useState('');
+  const [demoTempStatus, setDemoTempStatus] = useState('');
 
   const [showFoldersActionModal, setShowFoldersActionModal] = useState({
     state: false,
     action: '',
   });
+  const [dowellReasearchTemplates, setDowellResearchTemplates] = useState([]);
 
   // const [createdNewTeam, setCreatedNewTeam] = useState();
 
@@ -135,6 +142,30 @@ export const AppContextProvider = ({ children }) => {
     setWorkflowSettings(res.data);
   };
 
+  const fetchDemoTemplates = async () => {
+    setDemoTempStatus('pending');
+    try {
+      const res = await new TemplateServices().demoTemplates(1);
+      setDemoTemplates(res.data ? res.data.templates : []);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setDemoTempStatus('');
+    }
+  };
+
+  const fetchDemoDocuments = async () => {
+    setDemoDocStatus('pending');
+    try {
+      const res = await new DocumentServices().demoDocuments(1);
+      setDemoDocuments(res.data ? res.data.documents : []);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setDemoDocStatus('');
+    }
+  };
+
   const fetchFolders = async () => {
     const folderServices = new FolderServices();
     const userCompanyId =
@@ -194,8 +225,8 @@ export const AppContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (userDetail && userDetail.portfolio_info) {
-      fetchFolders();
       fetchSettings();
+      fetchFolders();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userDetail]);
@@ -355,6 +386,14 @@ export const AppContextProvider = ({ children }) => {
         userDetail,
         isFetchingFolders,
         fetchFolders,
+        demoTemplates,
+        setDemoTemplates,
+        demoDocuments,
+        setDemoDocuments,
+        demoDocStatus,
+        demoTempStatus,
+        fetchDemoTemplates,
+        fetchDemoDocuments,
       }}
     >
       {children}
