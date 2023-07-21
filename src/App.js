@@ -16,7 +16,7 @@ import WorkflowsPage from './pages/Workflows/AllWorkflowsPage/WorkflowsPage';
 
 import FoldersPage from './pages/Folders/FoldersPage';
 import FolderPage from './pages/Folders/FolderPage';
-
+import ProcessDetail from './components/manageFiles/ProcessDetail/ProcessDetail';
 import SetWorkflowInDoc from './components/setWorkFlowInDoc/SetWorkflowInDoc';
 import SetWorkflowInDocNew from './components/setWorkFlowInDocNew/SetWorkflowInDoc';
 
@@ -42,10 +42,9 @@ function App() {
       checkstatus();
     }, 300000); // 5 mints
 
-    return () => clearInterval(interval); 
-    
+    return () => clearInterval(interval);
   }, []);
-// console.log('chk')
+  // console.log('chk')
   function checkstatus() {
     // AJAX GET request
 
@@ -75,7 +74,7 @@ function App() {
             },
           }
         )
-        .then((response) => { })
+        .then((response) => {})
         .catch((error) => {
           console.log(error);
           // Empty catch block
@@ -87,7 +86,6 @@ function App() {
   //     <Route path='*' element={<ConstructionPage />} />
   //   </Routes>
   // );
-
 
   if (isPublicUser)
     return (
@@ -108,7 +106,11 @@ function App() {
             path={'saved'}
             element={<DocumentsPage showOnlySaved={true} />}
           />
-          <Route path={"completed"} element={<DocumentsPage showOnlyCompleted={true} />} />
+          <Route
+            path={'completed'}
+            element={<DocumentsPage showOnlyCompleted={true} />}
+          />
+          <Route path={'demo'} element={<DocumentsPage isDemo={true} />} />
           {/*  <Route path={"new"} element={<CreateNewDocumentPage />} />
         <Route path={"to-sign"} element={<SignDocumentsPage />} />
         <Route path={"rejected"} element={<RejectedDocumentsPage />} />
@@ -120,6 +122,7 @@ function App() {
             path={'saved'}
             element={<TemplatesPage showOnlySaved={true} />}
           />
+          <Route path={'demo'} element={<TemplatesPage isDemo={true} />} />
           {/* <Route path={"trash"} element={<TemplatesPage showOnlyTrashed={true} />}/> */}
           {/* <Route path={"new"} element={<CreateNewTemplatePage />} />
         <Route path={"to-approve"} element={<ApproveTemplatesPage />} />
@@ -160,9 +163,13 @@ function App() {
             path={'completed'}
             element={<ProccessPage showOnlyCompleted={true} />}
           />
+          <Route
+            path={'processdetail'}
+            element={<ProccessPage showSingleProcess={true} />}
+          />
+
           {/* <Route path={"trash"} element={<ProccessPage showOnlyTrashed={true} />}/> */}
         </Route>
-
         <Route path={'/notifications'} element={<NotificationsPage />} />
 
         <Route path={'/folders'}>

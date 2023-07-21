@@ -40,22 +40,26 @@ import { Tooltip } from 'react-tooltip';
 import { useTranslation } from 'react-i18next';
 import { GrStatusGoodSmall } from 'react-icons/gr';
 import { productName } from '../../utils/helpers';
+import { useAppContext } from '../../contexts/AppContext';
+import { HashLink } from 'react-router-hash-link';
+import { IoMdArrowDropright } from 'react-icons/io';
+import { httpApiUrl } from '../../httpCommon/httpCommon';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [knowledge, Setknowledge] = useState([
-    {
-      id: uuidv4(),
-      parent: 'Templates',
-      children: [
-        { id: uuidv4(), child: 'Proposal' },
-        { id: uuidv4(), child: 'Student Progress reports' },
-        { id: uuidv4(), child: 'Resume' },
-        { id: uuidv4(), child: 'Christmas cards' },
-        { id: uuidv4(), child: 'Birthday cards' },
-      ],
-    },
+    // {
+    //   id: uuidv4(),
+    //   parent: 'Templates',
+    //   children: [
+    //     { id: uuidv4(), child: 'Proposal' },
+    //     { id: uuidv4(), child: 'Student Progress reports' },
+    //     { id: uuidv4(), child: 'Resume' },
+    //     { id: uuidv4(), child: 'Christmas cards' },
+    //     { id: uuidv4(), child: 'Birthday cards' },
+    //   ],
+    // },
     {
       id: uuidv4(),
       parent: 'Landing Supports',
@@ -109,11 +113,15 @@ const Sidebar = () => {
     },
   ]);
   const { userDetail, session_id } = useSelector((state) => state.auth);
-  const { IconColor, ShowProfileSpinner } = useSelector((state) => state.app);
+  const { IconColor, ShowProfileSpinner, themeColor } = useSelector(
+    (state) => state.app
+  );
   const navigate = useNavigate();
   useCloseElementOnEscapekeyClick(() =>
     dispatch(setLegalAgreePageLoading(false))
   );
+
+  const { workflowSettings } = useAppContext();
 
   useEffect(() => {
     getAgreeStatus(session_id)
@@ -192,7 +200,13 @@ const Sidebar = () => {
   useEffect(() => {
     axios
       .get(
-        'https://100094.pythonanywhere.com/v1/companies/6385c0f38eca0fb652c9457e/templates/?='
+        `${httpApiUrl}companies/6385c0f38eca0fb652c9457e/templates/?=${
+          userDetail?.portfolio_info?.length > 1
+          ? userDetail?.portfolio_info.find(
+              (portfolio) => portfolio.product === productName
+            )?.data_type
+          : userDetail?.portfolio_info[0]?.data_type
+        }`
       )
       .then((response) => {
         const templateNames = response.data.templates.map(
@@ -286,7 +300,7 @@ const Sidebar = () => {
         </h2>
       </div>
       <div className={styles.organization__box}>
-        <h2 className={styles.organization__text}>
+        <h2 className={styles.organization__text} style={{ color: themeColor }}>
           {userDetail?.portfolio_info?.length > 1
             ? userDetail?.portfolio_info?.find(
                 (portfolio) => portfolio.product === productName
@@ -323,10 +337,24 @@ const Sidebar = () => {
       <div className={styles.feature__box}>
         <h2
           className={`${styles.feature__title} ${styles.feature__title__small}`}
+          style={{ color: themeColor }}
         >
           {t('DoWell')} {t('Knowledge Center')}
         </h2>
-        <CollapseItem items={knowledge} exception={true} />
+        <HashLink
+          to='/templates/demo#demo'
+          className={`${styles.templates_href} ${styles.parent__item__box}`}
+        >
+          Templates
+        </HashLink>
+
+        <HashLink
+          to='/documents/demo#demo'
+          className={`${styles.templates_href} ${styles.parent__item__box}`}
+        >
+          Documents
+        </HashLink>
+        {/* <CollapseItem items={knowledge} exception={true} /> */}
 
         <span className={styles.knowledge__Extra__Info}>
           {t('DoWell')} {t('True moments user experience lab')}
