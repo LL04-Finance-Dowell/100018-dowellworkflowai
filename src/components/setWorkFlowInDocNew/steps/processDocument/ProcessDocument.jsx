@@ -1,7 +1,7 @@
 import styles from './processDocument.module.css';
 import { v4 as uuidv4 } from 'uuid';
 import { useState, useEffect } from 'react';
-
+import Popup from '../../../Popup/Popup';
 import { useForm } from 'react-hook-form';
 import Select from '../../select/Select';
 import { AiOutlineClose } from 'react-icons/ai';
@@ -22,13 +22,14 @@ import {
   setAllProcesses,
   setAllowErrorChecksStatusUpdateForNewProcess,
   setNewProcessErrorMessage,
-  setProcessName,
-  setShowProcessNameModal
+  setCurrentMessage,
+
 } from '../../../../features/app/appSlice';
 import { useTranslation } from 'react-i18next';
 import { extractProcessObj } from './utils/utils';
 
-const ProcessDocument = ({ savedProcess }) => {
+const ProcessDocument = ({ savedProcess, Process_title, setProcess_title }) => {
+
   // const [ScrollView , SetScrollView] = useState();
 
   // useEffect(() => {
@@ -58,8 +59,6 @@ const ProcessDocument = ({ savedProcess }) => {
     teamMembersSelectedForProcess,
     userMembersSelectedForProcess,
     publicMembersSelectedForProcess,
-    ShowProcessNameModal,
-    ProcessName,
     allProcesses,
     errorsCheckedInNewProcess,
   } = useSelector((state) => state.app);
@@ -80,6 +79,7 @@ const ProcessDocument = ({ savedProcess }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [processName, setProcessName] = useState("");
 
   const handleProcessBtnClick = async () => {
 
@@ -87,25 +87,39 @@ const ProcessDocument = ({ savedProcess }) => {
 
     if (!userDetail) return;
     if (!currentDocToWfs) {
-      document.querySelector('#select-doc').scrollIntoView({ block: 'center' })
+      document.querySelector('#select-doc')?.scrollIntoView({ block: 'center' })
+      // dispatch(setPopupIsOpen(true));
+      // dispatch( setCurrentMessage('You have not selected a document'))
+
+
       return toast.info('You have not selected a document');
 
     };
     if (!docCurrentWorkflow) {
-      document.querySelector('#step-title').scrollIntoView({ block: 'center' });
+      document.querySelector('#step-title')?.scrollIntoView({ block: 'center' });
+      // dispatch(setPopupIsOpen(true));
+      // dispatch( setCurrentMessage('You have not selected a workflow'))
+
       return toast.info('You have not selected any workflow');
     }
     if (processSteps.length < 1) {
+      // dispatch(setPopupIsOpen(true));
+      // dispatch( setCurrentMessage('You have not configured steps for any workflow'))
 
       return toast.info('You have not configured steps for any workflow')
     }
     if (!errorsCheckedInNewProcess) {
-      document.querySelector('#h2__Doc__Title').scrollIntoView({ block: 'center' })
+      document.querySelector('#h2__Doc__Title')?.scrollIntoView({ block: 'center' })
+      // dispatch(setPopupIsOpen(true));
+      // dispatch( setCurrentMessage('Please click the "Show process" button above to make sure there are no errors before processing'))
+
       return toast.info('Please click the "Show process" button above to make sure there are no errors before processing.');
     }
+    console.log('pt-title', Process_title)
 
-    dispatch(setShowProcessNameModal(false))
-    dispatch(setProcessName(""))
+
+
+
 
     if (processOptionSelection === 'saveAndContinueLater') {
       const processObjToSave = extractProcessObj(
@@ -128,7 +142,7 @@ const ProcessDocument = ({ savedProcess }) => {
     const processObjToPost = extractProcessObj(
       newProcessActionOptions[`${processOptionSelection}`],
       userDetail,
-      ProcessName,
+      Process_title,
       currentDocToWfs,
       docCurrentWorkflow,
       processSteps,
@@ -138,18 +152,23 @@ const ProcessDocument = ({ savedProcess }) => {
       userMembersSelectedForProcess,
     );
     console.log(processObjToPost)
-
+    
     if (processObjToPost.error) {
       dispatch(setNewProcessErrorMessage(processObjToPost.error));
-      document.querySelector('#h2__Doc__Title').scrollIntoView({ block: 'center' })
-
+      document.querySelector('#h2__Doc__Title')?.scrollIntoView({ block: 'center' })
+      // dispatch(setPopupIsOpen(true));
+      // dispatch( setCurrentMessage(processObjToPost.error))
+      
       return toast.info(processObjToPost.error);
     }
-
+    
     dispatch(setAllowErrorChecksStatusUpdateForNewProcess(true));
     dispatch(setNewProcessErrorMessage(null));
+    setProcess_title("")
 
     if (!errorsCheckedInNewProcess)
+      // dispatch(setPopupIsOpen(true));
+      // dispatch( setCurrentMessage('Please click the "Show process" button above to make sure there are no errors before processing.'))
       return toast.info(
         'Please click the "Show process" button above to make sure there are no errors before processing.'
       );
@@ -188,11 +207,8 @@ const ProcessDocument = ({ savedProcess }) => {
       );
     }
 
-  };
-  const HandleSaveClick = () => {
-    dispatch(setShowProcessNameModal(true))
 
-  }
+  };
 
   const handleSaveForLaterBtnClick = () => {
 
@@ -304,7 +320,7 @@ const ProcessDocument = ({ savedProcess }) => {
   return (
     <>
       <div className={styles.container}>
-        <h2 className={styles.h2__Doc__Title}>5. {t('Process Document')}</h2>
+        <h2 className={styles.h2__Doc__Title}>6. {t('Process Document')}</h2>
         <div className={styles.box}>
           <div className={styles.box__inner}>
             <h3 className={styles.box__header}>
@@ -317,8 +333,12 @@ const ProcessDocument = ({ savedProcess }) => {
               register={register}
             />
 
+            {/* {
+               popupIsOpen && <Popup/>
+            } */}
 
-            {ShowProcessNameModal && (
+
+            {/* {ShowProcessNameModal && (
               <div style={{
                 background: 'rgba(0, 0, 0, 0.12)',
                 backdropFilter: 'blur(5px)',
@@ -365,25 +385,27 @@ const ProcessDocument = ({ savedProcess }) => {
                       width: '100%',
                       color: 'black',
                       outline: 'none',
+                      padding:'10px',
                       height: '40px',
                       borderRadius: '5px',
                       '::placeholder': {
                         fontSize: '36px', // Adjust the font size as desired
                         color: 'grey',
+                       
                       },
                     }}
-                    value={ProcessName}
-                    onChange={(e) => dispatch(setProcessName(e.target.value))}
+                    value={processName}
+                    onChange={(e) => setProcessName(e.target.value)}
                   />
 
 
                   <div
-                    style={{ textAlign: "center", marginTop: "30px", backgroundColor: "black", color: "white", cursor: "pointer" }}
-                    onClick={handleProcessBtnClick}
+                    style={{ textAlign: "center", marginTop: "30px", backgroundColor: "#61ce70", color: "white", cursor: "pointer" }}
+                    // onClick={handleProcessBtnClick}
                   >Save</div>
                 </div>
               </div>
-            )}
+            )} */}
 
             {newProcessLoading ? (
               <ProgressBar
@@ -392,7 +414,7 @@ const ProcessDocument = ({ savedProcess }) => {
                 style={{ height: '40px' }}
               />
             ) : (
-              <button hoverBg='success' onClick={HandleSaveClick}>
+              <button hoverBg='success' onClick={handleProcessBtnClick}>
                 {t('Save / Start Process')}
               </button>
             )}

@@ -42,8 +42,6 @@ import { GrStatusGoodSmall } from 'react-icons/gr';
 import { productName } from '../../utils/helpers';
 import { useAppContext } from '../../contexts/AppContext';
 import { HashLink } from 'react-router-hash-link';
-import { IoMdArrowDropright } from 'react-icons/io';
-import { httpApiUrl } from '../../httpCommon/httpCommon';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -197,40 +195,34 @@ const Sidebar = () => {
   };
 
   /////////////////////
-  useEffect(() => {
-    axios
-      .get(
-        `${httpApiUrl}companies/6385c0f38eca0fb652c9457e/templates/?=${
-          userDetail?.portfolio_info?.length > 1
-          ? userDetail?.portfolio_info.find(
-              (portfolio) => portfolio.product === productName
-            )?.data_type
-          : userDetail?.portfolio_info[0]?.data_type
-        }`
-      )
-      .then((response) => {
-        const templateNames = response.data.templates.map(
-          (template) => template.template_name
-        );
-        const updatedKnowledge = knowledge.map((item) => {
-          if (item.parent === 'Templates') {
-            const updatedChildren = item.children.map((child, index) => {
-              // Map each template child to the corresponding template name from the response
-              if (index < templateNames.length) {
-                return { id: uuidv4(), child: templateNames[index] };
-              }
-              return child;
-            });
-            return { ...item, children: updatedChildren };
-          }
-          return item;
-        });
-        Setknowledge(updatedKnowledge);
-      })
-      .catch((error) => {
-        // Handle any errors
-      });
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get(
+  //       'https://100094.pythonanywhere.com/v1/companies/6385c0f38eca0fb652c9457e/templates/?='
+  //     )
+  //     .then((response) => {
+  //       const templateNames = response.data.templates.map(
+  //         (template) => template.template_name
+  //       );
+  //       const updatedKnowledge = knowledge.map((item) => {
+  //         if (item.parent === 'Templates') {
+  //           const updatedChildren = item.children.map((child, index) => {
+  //             // Map each template child to the corresponding template name from the response
+  //             if (index < templateNames.length) {
+  //               return { id: uuidv4(), child: templateNames[index] };
+  //             }
+  //             return child;
+  //           });
+  //           return { ...item, children: updatedChildren };
+  //         }
+  //         return item;
+  //       });
+  //       Setknowledge(updatedKnowledge);
+  //     })
+  //     .catch((error) => {
+  //       // Handle any errors
+  //     });
+  // }, []);
 
   return (
     <div className={styles.container}>

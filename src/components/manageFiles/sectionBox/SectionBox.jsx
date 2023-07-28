@@ -34,6 +34,7 @@ const SectionBox = ({
   hideDeleteIcon,
   folderId,
   isDemo,
+  isReports,
 }) => {
   const [sliceCount, setSliceCount] = useState(1);
   const [refreshLoading, setRefreshLoading] = useState(false);
@@ -48,7 +49,14 @@ const SectionBox = ({
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [cardItemsVar, setCardItemsVar] = useState(cardItems);
   const [count, setCount] = useState(1);
-  const { fetchDemoTemplates, fetchDemoDocuments } = useAppContext();
+  const {
+    fetchDemoTemplates,
+    fetchDemoDocuments,
+    fetchDocumentReports,
+    fetchTemplateReports,
+    userName,
+    portfolioName,
+  } = useAppContext();
 
   const handleLoadMore = () => {
     setSliceCount((prev) => prev + 1);
@@ -85,7 +93,11 @@ const SectionBox = ({
   const handleRefresh = () => {
     if (refreshLoading) return;
 
-    const [currentUserCompanyId, currentUserportfolioDataType] = [
+    const [
+      currentUserCompanyId,
+      currentUserportfolioDataType,
+      currentUserPortfolioName,
+    ] = [
       userDetail?.portfolio_info?.length > 1
         ? userDetail?.portfolio_info.find(
             (portfolio) => portfolio.product === productName
@@ -96,6 +108,11 @@ const SectionBox = ({
             (portfolio) => portfolio.product === productName
           )?.data_type
         : userDetail?.portfolio_info[0]?.data_type,
+      userDetail?.portfolio_info?.length > 1
+        ? userDetail?.portfolio_info.find(
+            (portfolio) => portfolio.product === productName
+          )?.data_type
+        : userDetail?.portfolio_info[0]?.portfolio_name,
     ];
 
     if (itemType === 'documents') {
@@ -108,7 +125,9 @@ const SectionBox = ({
 
       const documentServices = new DocumentServices();
 
-      if (!isDemo) {
+      if (isDemo) fetchDemoDocuments();
+      else if (isReports) fetchDocumentReports();
+      else {
         documentServices
           .allDocuments(data.company_id, data.data_type)
           .then((res) => {
@@ -132,13 +151,15 @@ const SectionBox = ({
             toast.info('Refresh for documents failed');
             setRefreshLoading(false);
           });
-      } else fetchDemoDocuments();
+      }
     }
 
     if (itemType === 'templates') {
       setRefreshLoading(true);
 
-      if (!isDemo) {
+      if (isDemo) fetchDemoTemplates();
+      else if (isReports) fetchTemplateReports();
+      else {
         const data = {
           company_id: currentUserCompanyId,
           data_type: currentUserportfolioDataType,
@@ -168,7 +189,7 @@ const SectionBox = ({
             toast.info('Refresh for templates failed');
             setRefreshLoading(false);
           });
-      } else fetchDemoTemplates();
+      }
     }
 
     if (itemType === 'workflows') {
@@ -248,32 +269,37 @@ const SectionBox = ({
       const documentService = new DocumentServices();
 
       documentService
-        .allDocuments(currentUserCompanyId, currentUserportfolioDataType)
+        .getNotifications(
+          currentUserCompanyId,
+          currentUserportfolioDataType,
+          userName,
+          portfolioName
+        )
         .then((res) => {
-          // console.log(res.data);
-          // console.log(userDetail?.userinfo?.username);
-          // console.log(
-          //   res.data.documents.filter(
-          //     (item) =>
-          //       item.auth_viewers &&
-          //       !Array.isArray(item.auth_viewers) &&
-          //       typeof item.auth_viewers !== 'string'
-          //   )
-          // );
           const documentsToSign = res.data.documents
-            .reverse()
-            .filter(
-              (document) =>
-                document.company_id === currentUserCompanyId &&
-                document.data_type === currentUserportfolioDataType &&
-                (document.state === 'processing' ||
-                  document.document_state === 'processing') &&
-                document.auth_viewers &&
-                (Array.isArray(document.auth_viewers) ||
-                  typeof document.auth_viewers === 'string') &&
-                document.auth_viewers.includes(userDetail?.userinfo?.username)
-            )
-            .filter((document) => document.process_id);
+            ? res.data.documents
+                ?.reverse()
+                .filter(
+                  (document) =>
+                    document.auth_viewers &&
+                    Array.isArray(document.auth_viewers) &&
+                    // new format
+                    ((document.auth_viewers.every(
+                      (item) => typeof item === 'object'
+                    ) &&
+                      document.auth_viewers
+                        .map((viewer) => viewer.member)
+                        .includes(userDetail?.userinfo?.username) &&
+                      document.auth_viewers
+                        .map((viewer) => viewer.portfolio)
+                        .includes(currentUserPortfolioName)) ||
+                      // old format
+                      document.auth_viewers.includes(
+                        userDetail?.userinfo?.username
+                      ))
+                )
+                .filter((document) => document.process_id)
+            : [];
 
           const currentNotifications = notificationsForUser.slice();
           let updatedNotifications = currentNotifications.map(
@@ -291,7 +317,7 @@ const SectionBox = ({
               return notification;
             }
           );
-          console.log(updatedNotifications);
+          // console.log(updatedNotifications);
           dispatch(setNotificationsForUser(updatedNotifications));
           toast.success('Successfully refreshed notifications');
           setRefreshLoading(false);

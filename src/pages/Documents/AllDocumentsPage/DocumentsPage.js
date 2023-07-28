@@ -6,12 +6,16 @@ import { v4 as uuidv4 } from 'uuid';
 import WorkflowLayout from '../../../layouts/WorkflowLayout/WorkflowLayout';
 import ManageFiles from '../../../components/manageFiles/ManageFiles';
 import { useDispatch, useSelector } from 'react-redux';
-import { allDocuments } from '../../../features/document/asyncThunks';
+import {
+  allDocuments,
+  savedDocuments,
+} from '../../../features/document/asyncThunks';
 import DocumentCard from '../../../components/hoverCard/documentCard/DocumentCard';
 import { useNavigate } from 'react-router-dom';
 import { productName } from '../../../utils/helpers';
 import { useAppContext } from '../../../contexts/AppContext';
 import { DocumentServices } from '../../../services/documentServices';
+import { useLocation } from 'react-router-dom';
 
 const DocumentsPage = ({ home, showOnlySaved, showOnlyCompleted, isDemo }) => {
   const { userDetail } = useSelector((state) => state.auth);
@@ -22,10 +26,21 @@ const DocumentsPage = ({ home, showOnlySaved, showOnlyCompleted, isDemo }) => {
   // const finilized = allDocumentsArray.filter((document) => document.document_state === "finalized")
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentUserPortfolioDataType, setCurrentUserPortfolioDataType] =
     useState('');
-  const { customDocName, demoDocuments, demoDocStatus, fetchDemoDocuments } =
-    useAppContext();
+  const {
+    customDocName,
+    demoDocuments,
+    demoDocStatus,
+    fetchDemoDocuments,
+    fetchDocumentReports,
+    docReports,
+    docReportsStatus,
+    savedDocuments,
+    savedDocumentsStatus,
+    fetchSavedDocuments,
+  } = useAppContext();
 
   useEffect(() => {
     if (isDemo) {
@@ -34,6 +49,11 @@ const DocumentsPage = ({ home, showOnlySaved, showOnlyCompleted, isDemo }) => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (location.hash === '#completed-documents' && !docReports)
+      fetchDocumentReports();
+  }, [location]);
 
   useEffect(() => {
     const userPortfolioDataType =
@@ -62,7 +82,10 @@ const DocumentsPage = ({ home, showOnlySaved, showOnlyCompleted, isDemo }) => {
   }, [userDetail]);
 
   useEffect(() => {
-    if (showOnlySaved) navigate('#saved-documents');
+    if (showOnlySaved) {
+      navigate('#saved-documents');
+      if (!savedDocuments) fetchSavedDocuments();
+    }
     if (showOnlyCompleted) navigate('#completed-documents');
     if (home) navigate('#drafts');
     // if(isDemo) navigate("#demo");
@@ -72,6 +95,22 @@ const DocumentsPage = ({ home, showOnlySaved, showOnlyCompleted, isDemo }) => {
   // useEffect(() => {
   //   console.log('all Docs: ', allDocumentsArray);
   // });
+
+  // useEffect(() => {
+  //   console.log('all Docs: ', allDocumentsArray);
+  //   console.log(
+  //     'all Docs filter: ',
+  //     allDocumentsArray.filter(
+  //       (item) =>
+  //         item.created_by === userDetail?.userinfo?.username &&
+  //         item.document_type === 'original'
+  //     )
+  //   );
+  // }, [allDocumentsArray]);
+
+  // useEffect(() => {
+  //   console.log('Saved Docs: ', savedDocuments);
+  // }, [savedDocuments]);
 
   return (
     <WorkflowLayout>
@@ -90,15 +129,11 @@ const DocumentsPage = ({ home, showOnlySaved, showOnlyCompleted, isDemo }) => {
                 cardItems={
                   allDocumentsArray &&
                   allDocumentsArray.length &&
-                  allDocumentsArray
-                    .filter(
-                      (item) =>
-                        item.created_by === userDetail?.userinfo?.username &&
-                        item.document_type === 'original'
-                    )
-                    .filter(
-                      (item) => item.data_type === currentUserPortfolioDataType
-                    )
+                  allDocumentsArray.filter(
+                    (item) =>
+                      item.created_by === userDetail?.userinfo?.username &&
+                      item.document_type === 'original'
+                  )
                 }
                 status={allDocumentsStatus}
                 itemType={'documents'}
@@ -113,10 +148,8 @@ const DocumentsPage = ({ home, showOnlySaved, showOnlyCompleted, isDemo }) => {
                 cardBgColor='#1ABC9C'
                 title='saved documents'
                 Card={DocumentCard}
-                cardItems={allDocumentsArray.filter(
-                  (document) => document.document_state === 'finalized'
-                )}
-                status={allDocumentsStatus}
+                cardItems={savedDocuments}
+                status={savedDocumentsStatus}
                 itemType={'documents'}
               />
             </div>
@@ -129,11 +162,10 @@ const DocumentsPage = ({ home, showOnlySaved, showOnlyCompleted, isDemo }) => {
                 cardBgColor='#1ABC9C'
                 title='completed documents'
                 Card={DocumentCard}
-                cardItems={allDocumentsArray.filter(
-                  (document) => document.document_state === 'finalized'
-                )}
-                status={allDocumentsStatus}
+                cardItems={docReports}
+                status={docReportsStatus}
                 itemType={'documents'}
+                isReports={true}
               />
             </div>
           ) : (

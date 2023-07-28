@@ -19,7 +19,7 @@ import {
 import { Button } from '../styledComponents';
 import { LoadingSpinner } from '../../LoadingSpinner/LoadingSpinner';
 import axios from 'axios';
-import { api_url, httpApiUrl } from '../../../httpCommon/httpCommon';
+import { api_url } from '../../../httpCommon/httpCommon';
 import { productName } from '../../../utils/helpers';
 
 const ProcessCard = ({ cardItem, title }) => {
@@ -51,7 +51,7 @@ const ProcessCard = ({ cardItem, title }) => {
   function getProcessDetail(process_id, process_title) {
 
     axios
-      .get(`${httpApiUrl}processes/${process_id}/`)
+      .get(`https://100094.pythonanywhere.com/v1/processes/${process_id}/`)
       .then((response) => {
         
         
