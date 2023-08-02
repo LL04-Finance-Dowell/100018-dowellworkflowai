@@ -11,6 +11,10 @@ import { v4 } from 'uuid';
 import { FolderServices } from '../services/folderServices';
 import { TemplateServices } from '../services/templateServices';
 import { DocumentServices } from '../services/documentServices';
+import {
+  getCompletedProcesses,
+  getActiveProcesses,
+} from '../services/processServices';
 
 const AppContext = createContext({});
 
@@ -75,17 +79,28 @@ export const AppContextProvider = ({ children }) => {
   const [demoDocuments, setDemoDocuments] = useState(null);
   const [demoDocStatus, setDemoDocStatus] = useState('');
   const [demoTempStatus, setDemoTempStatus] = useState('');
-  const [docReports, setDocReports] = useState(null);
-  const [docReportsStatus, setDocReportsStatus] = useState('');
+  const [docsCompleted, setDocsCompleted] = useState(null);
+  const [docsRejected, setDocsRejected] = useState(null);
+  const [docsCompletedStatus, setDocsCompletedStatus] = useState('');
+  const [docsRejectedStatus, setDocsRejectedStatus] = useState('');
+  const [orgDocsCompleted, setOrgDocsCompleted] = useState(null);
+  const [orgDocsRejected, setOrgDocsRejected] = useState(null);
+  const [orgDocsCompletedStatus, setOrgDocsCompletedStatus] = useState('');
+  const [orgDocsRejectedStatus, setOrgDocsRejectedStatus] = useState('');
   const [savedDocuments, setSavedDocuments] = useState(null);
   const [savedDocumentsStatus, setSavedDocumentsStatus] = useState('');
   const [tempReports, setTempReports] = useState(null);
   const [tempReportsStatus, setTempReportsStatus] = useState('');
+  const [completedProcesses, setCompletedProcesses] = useState(null);
+  const [completedProcessesStatus, setCompletedProcessesStatus] = useState('');
+  const [activeProcesses, setActiveProcesses] = useState(null);
+  const [activeProcessesStatus, setActiveProcessesStatus] = useState('');
+
   const [companyId, setCompanyId] = useState(
     userDetail?.portfolio_info?.length > 1
       ? userDetail?.portfolio_info.find(
-          (portfolio) => portfolio.product === productName
-        )?.org_id
+        (portfolio) => portfolio.product === productName
+      )?.org_id
       : userDetail?.portfolio_info[0].org_id
   );
   const [userName, setUserName] = useState(
@@ -97,8 +112,8 @@ export const AppContextProvider = ({ children }) => {
   const [dataType, setDataType] = useState(
     userDetail?.portfolio_info?.length > 1
       ? userDetail?.portfolio_info.find(
-          (portfolio) => portfolio.product === productName
-        )?.data_type
+        (portfolio) => portfolio.product === productName
+      )?.data_type
       : userDetail?.portfolio_info[0]?.data_type
   );
 
@@ -159,8 +174,8 @@ export const AppContextProvider = ({ children }) => {
     const userCompanyId =
       userDetail?.portfolio_info?.length > 1
         ? userDetail?.portfolio_info?.find(
-            (portfolio) => portfolio.product === productName
-          )?.org_id
+          (portfolio) => portfolio.product === productName
+        )?.org_id
         : userDetail?.portfolio_info[0]?.org_id;
 
     const res = await new WorkflowSettingServices().fetchWorkflowSettings(
@@ -182,20 +197,66 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
-  const fetchDocumentReports = async () => {
-    setDocReportsStatus('pending');
+  const fetchDocumentReports = async (state) => {
+    if (state === 'finalized') setDocsCompletedStatus('pending');
+    else if (state === 'rejected') setDocsRejectedStatus('pending');
     try {
       const res = await new DocumentServices().getDocumentReports(
         companyId,
         dataType,
         userName,
-        portfolioName
+        portfolioName,
+        state
       );
-      setDocReports(res.data.documents ? res.data.documents : []);
+      if (state === 'finalized')
+        setDocsCompleted(res.data.documents ? res.data.documents : []);
+      else if (state === 'rejected')
+        setDocsRejected(res.data.documents ? res.data.documents : []);
     } catch (err) {
       console.log(err);
     } finally {
-      setDocReportsStatus('');
+      if (state === 'finalized') setDocsCompletedStatus('');
+      else if (state === 'rejected') setDocsRejectedStatus('');
+    }
+  };
+
+  const fetchOrgDocumentReports = async (state) => {
+    if (state === 'finalized') setOrgDocsCompletedStatus('pending');
+    else if (state === 'rejected') setOrgDocsRejectedStatus('pending');
+    try {
+      const res = await new DocumentServices().getOrgDocumentReports(
+        companyId,
+        dataType,
+        state
+      );
+      if (state === 'finalized')
+        setOrgDocsCompleted(res.data.clones ? res.data.clones : []);
+      else if (state === 'rejected')
+        setOrgDocsRejected(res.data.clones ? res.data.clones : []);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      if (state === 'finalized') setOrgDocsCompletedStatus('');
+      else if (state === 'rejected') setOrgDocsRejectedStatus('');
+    }
+  };
+
+  const fetchProcessReports = async (type) => {
+    if (type === 'completed') setCompletedProcessesStatus('pending');
+    else if (type === 'active') setActiveProcessesStatus('pending');
+    try {
+      if (type === 'completed') {
+        const res = await getCompletedProcesses(companyId, dataType);
+        setCompletedProcesses(res.data ? res.data : []);
+      } else if (type === 'active') {
+        const res = await getActiveProcesses(companyId, dataType);
+        setActiveProcesses(res.data ? res.data : []);
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      if (type === 'completed') setCompletedProcessesStatus('');
+      else if (type === 'active') setActiveProcessesStatus('');
     }
   };
 
@@ -250,8 +311,8 @@ export const AppContextProvider = ({ children }) => {
     const userCompanyId =
       userDetail?.portfolio_info?.length > 1
         ? userDetail?.portfolio_info?.find(
-            (portfolio) => portfolio.product === productName
-          )?.org_id
+          (portfolio) => portfolio.product === productName
+        )?.org_id
         : userDetail?.portfolio_info[0]?.org_id;
     setIsFetchingFolders(true);
     try {
@@ -272,8 +333,8 @@ export const AppContextProvider = ({ children }) => {
       setCompanyId(
         userDetail?.portfolio_info?.length > 1
           ? userDetail?.portfolio_info.find(
-              (portfolio) => portfolio.product === productName
-            )?.org_id
+            (portfolio) => portfolio.product === productName
+          )?.org_id
           : userDetail?.portfolio_info[0].org_id
       );
       setUserName(userDetail?.portfolio_info[0]?.username);
@@ -281,8 +342,8 @@ export const AppContextProvider = ({ children }) => {
       setDataType(
         userDetail?.portfolio_info?.length > 1
           ? userDetail?.portfolio_info.find(
-              (portfolio) => portfolio.product === productName
-            )?.data_type
+            (portfolio) => portfolio.product === productName
+          )?.data_type
           : userDetail?.portfolio_info[0]?.data_type
       );
     }
@@ -297,8 +358,8 @@ export const AppContextProvider = ({ children }) => {
         const userCompanyId =
           userDetail?.portfolio_info?.length > 1
             ? userDetail?.portfolio_info?.find(
-                (portfolio) => portfolio.product === productName
-              )?.org_id
+              (portfolio) => portfolio.product === productName
+            )?.org_id
             : userDetail?.portfolio_info[0]?.org_id;
 
         settingService
@@ -373,8 +434,8 @@ export const AppContextProvider = ({ children }) => {
                         title === 'Process'
                           ? 'Processes'
                           : title === 'Portfolio Choice'
-                          ? 'Portfolio/Team Roles'
-                          : title,
+                            ? 'Portfolio/Team Roles'
+                            : title,
                       boxId: child._id,
                     });
                 });
@@ -402,7 +463,7 @@ export const AppContextProvider = ({ children }) => {
           (item.content.includes('Documents') ||
             item.content.includes('Templates') ||
             item.content.includes('Workflows')) &&
-          !item.content.includes('set display name')
+            !item.content.includes('set display name')
             ? item.content
             : null
       );
@@ -492,11 +553,18 @@ export const AppContextProvider = ({ children }) => {
         fetchDemoTemplates,
         fetchDemoDocuments,
         fetchDocumentReports,
-        docReports,
-        docReportsStatus,
+        docsCompleted,
+        docsRejected,
+        docsCompletedStatus,
+        docsRejectedStatus,
         tempReports,
         tempReportsStatus,
         fetchTemplateReports,
+        activeProcesses,
+        activeProcessesStatus,
+        completedProcesses,
+        completedProcessesStatus,
+        fetchProcessReports,
         userName,
         portfolioName,
         savedDocuments,
@@ -504,6 +572,12 @@ export const AppContextProvider = ({ children }) => {
         fetchSavedDocuments,
         isAssignTask,
         setIsAssignTask,
+        dataType,
+        orgDocsCompleted,
+        orgDocsRejected,
+        orgDocsCompletedStatus,
+        orgDocsRejectedStatus,
+        fetchOrgDocumentReports
       }}
     >
       {children}
