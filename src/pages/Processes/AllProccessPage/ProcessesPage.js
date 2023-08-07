@@ -43,6 +43,8 @@ const ProcessesPage = ({
     DetailFetched,
   } = useSelector((state) => state.app);
   const { userDetail } = useSelector((state) => state.auth);
+
+
   const [completedProcess, SetcompletedPcocess] = useState();
   const dispatch = useDispatch();
   const navigate = useNavigate();

@@ -48,25 +48,24 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // // ! Comment the below useEffect to prevent redirection
-  // useEffect(() => {
-  //   if (!session_id) return
+  // ! Comment the below useEffect to prevent redirection
+  useEffect(() => {
+    if (!session_id) return
 
-  //   if (window.location.pathname.includes('-testing')) {
-  //     if (dataType === 'Real_Data') window.location.replace(
-  //       id ?
-  //       `${clientVerUrlRef.current}#?session_id=${session_id}&id=${id}` :
-  //       `${clientVerUrlRef.current}#?session_id=${session_id}`
-  //       );
-  //   } else {
-  //     if (dataType !== 'Real_Data') window.location.replace(
-  //       id ?
-  //       `${betaVerUrlRef.current}#?session_id=${session_id}&id=${id}` :
-  //       `${betaVerUrlRef.current}#?session_id=${session_id}`
-  //     )
-  //   }
-  // }, [dataType])
-  // console.log('chk')
+    if (window.location.pathname.includes('-testing')) {
+      if (dataType === 'Real_Data') window.location.replace(
+        id ?
+        `${clientVerUrlRef.current}#?session_id=${session_id}&id=${id}` :
+        `${clientVerUrlRef.current}#?session_id=${session_id}`
+        );
+    } else {
+      if (dataType !== 'Real_Data') window.location.replace(
+        id ?
+        `${betaVerUrlRef.current}#?session_id=${session_id}&id=${id}` :
+        `${betaVerUrlRef.current}#?session_id=${session_id}`
+      )
+    }
+  }, [dataType])
   
   function checkstatus() {
     // AJAX GET request
@@ -103,7 +102,8 @@ function App() {
           // Empty catch block
         });
   }
-  // // USE ONLY WHEN APP IS BROKEN OR UNDERGOING MAJOR CHANGES
+
+  // USE ONLY WHEN APP IS BROKEN OR UNDERGOING MAJOR CHANGES
   // return (
   //   <Routes>
   //     <Route path='*' element={<ConstructionPage />} />
