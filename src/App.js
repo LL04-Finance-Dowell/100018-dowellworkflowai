@@ -1,6 +1,6 @@
-import { useEffect, Suspense, useRef } from 'react';
+import { useEffect, Suspense, useRef, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { setIconColor } from './features/app/appSlice';
+import { setApiKeyFetchFailureMessage, setIconColor, setShowApiKeyFetchFailureModal } from './features/app/appSlice';
 import { auth_url } from './httpCommon/httpCommon';
 import { useDispatch, useSelector } from 'react-redux';
 import useDowellLogin from './hooks/useDowellLogin';
@@ -19,12 +19,12 @@ import FolderPage from './pages/Folders/FolderPage';
 import ProcessDetail from './components/manageFiles/ProcessDetail/ProcessDetail';
 import SetWorkflowInDoc from './components/setWorkFlowInDoc/SetWorkflowInDoc';
 import SetWorkflowInDocNew from './components/setWorkFlowInDocNew/SetWorkflowInDoc';
-
+import { setcreditResponse } from './features/app/appSlice'
 import WorkflowAiSettings from './components/workflowAiSettings/WorkflowAiSettings';
 import VerificationPage from './pages/Verification/VerificationPage';
 import ProccessPage from './pages/Processes/AllProccessPage/ProcessesPage';
 import SearchPage from './pages/Search/SearchPage';
-
+import { productName } from './utils/helpers';
 import { useAppContext } from './contexts/AppContext';
 
 import axios from 'axios';
@@ -33,13 +33,17 @@ import axios from 'axios';
 function App() {
   const dispatch = useDispatch();
   const { session_id, userDetail, id } = useSelector((state) => state.auth);
+  const { IconColor, ShowProfileSpinner, themeColor, creditResponse } = useSelector(
+    (state) => state.app
+  );
+  const [ companyId, setCompanyId ] = useState(null);
   const { isPublicUser, dataType } = useAppContext();
   const clientVerUrlRef = useRef('https://ll04-finance-dowell.github.io/workflowai.online/')
   const betaVerUrlRef = useRef('https://ll04-finance-dowell.github.io/100018-dowellWorkflowAi-testing/')
-
-
+  
+  
   useDowellLogin();
-
+  
   useEffect(() => {
     const interval = setInterval(() => {
       checkstatus();
@@ -48,25 +52,66 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // ! Comment the below useEffect to prevent redirection
   useEffect(() => {
-    if (!session_id) return
 
-    if (window.location.pathname.includes('-testing')) {
-      if (dataType === 'Real_Data') window.location.replace(
-        id ?
-        `${clientVerUrlRef.current}#?session_id=${session_id}&id=${id}` :
-        `${clientVerUrlRef.current}#?session_id=${session_id}`
-        );
-    } else {
-      if (dataType !== 'Real_Data') window.location.replace(
-        id ?
-        `${betaVerUrlRef.current}#?session_id=${session_id}&id=${id}` :
-        `${betaVerUrlRef.current}#?session_id=${session_id}`
-      )
-    }
-  }, [dataType])
+    if (!userDetail) return
+
+    setCompanyId(
+      userDetail?.portfolio_info?.length > 1 ? 
+        userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_id 
+        : 
+        userDetail?.portfolio_info[0].org_id
+    )
+  }, [userDetail])
   
+  // // ! Comment the below useEffect to prevent redirection
+  useEffect(() => {
+    //   if (!session_id) return
+    
+    //   if (window.location.pathname.includes('-testing')) {
+      //     if (dataType === 'Real_Data') window.location.replace(
+        //       id ?
+        //       `${clientVerUrlRef.current}#?session_id=${session_id}&id=${id}` :
+        //       `${clientVerUrlRef.current}#?session_id=${session_id}`
+        //       );
+        //   } else {
+          //     if (dataType !== 'Real_Data') window.location.replace(
+            //       id ?
+            //       `${betaVerUrlRef.current}#?session_id=${session_id}&id=${id}` :
+            //       `${betaVerUrlRef.current}#?session_id=${session_id}`
+            //     )
+            //   }
+
+    if (!companyId) return
+
+    axios
+    .get(`https://100105.pythonanywhere.com/api/v3/user/?type=get_api_key&workspace_id=${companyId}`)
+    .then((response) => {
+      if (!response.data?.success) {
+        dispatch(setShowApiKeyFetchFailureModal(true));
+        dispatch(setApiKeyFetchFailureMessage(response.data?.message));
+        return
+      } 
+
+      dispatch(setcreditResponse(response?.data?.data?.is_active))
+      console.log(response?.data?.data?.is_active)
+      dispatch(setcreditResponse(response?.data?.data?.total_credits))
+      console.log(response?.data?.data?.total_credits)
+      dispatch(setcreditResponse(response?.data?.data?.api_key))
+      console.log(response?.data?.data?.api_key)
+
+      // dispatch(setcreditResponse(response))
+    })
+    .catch((error) => {
+
+      console.log(error)
+    });
+
+
+
+  }, [dataType, companyId])
+  // console.log('chk')
+
   function checkstatus() {
     // AJAX GET request
 
@@ -102,6 +147,8 @@ function App() {
           // Empty catch block
         });
   }
+  // console.log(creditResponse.data.is_active)
+  // console.log(creditResponse.data.service_id)
 
   // USE ONLY WHEN APP IS BROKEN OR UNDERGOING MAJOR CHANGES
   // return (

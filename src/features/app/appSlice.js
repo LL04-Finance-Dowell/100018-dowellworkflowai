@@ -66,7 +66,8 @@ const initialState = {
   proccess: [],
   IconColor: '',
   ProcessName:'',
-  currentMessage:'',                              
+  currentMessage:'',   
+  creditResponse:[],                           
   userDetailPosition: null,
   languageSelectPosition: null,
   teamsSelectedSelectedForProcess: [],
@@ -98,6 +99,8 @@ const initialState = {
   allowErrorChecksStatusUpdateForNewProcess: false,
   newProcessErrorMessage: null,
   errorsCheckedInNewProcess: false,
+  showApiKeyFetchFailureModal: false,
+  apiKeyFetchFailureMessage: '',
 };
 
 export const appSlice = createSlice({
@@ -575,6 +578,9 @@ export const appSlice = createSlice({
     setCurrentMessage: (state, action) => {
       state.currentMessage = action.payload;
     },
+    setcreditResponse: (state, action) => {
+      state.creditResponse = action.payload;
+    },
     setTeamsSelectedSelectedForProcess: (state, action) => {
       state.teamsSelectedSelectedForProcess = [
         ...state.teamsSelectedSelectedForProcess,
@@ -762,6 +768,12 @@ export const appSlice = createSlice({
     setErrorsCheckedInNewProcess: (state, action) => {
       state.errorsCheckedInNewProcess = action.payload;
     },
+    setShowApiKeyFetchFailureModal: (state, action) => {
+      state.showApiKeyFetchFailureModal = action.payload;
+    },
+    setApiKeyFetchFailureMessage: (state, action) => {
+      state.apiKeyFetchFailureMessage = action.payload;
+    },
   },
   extraReducers: (builder) => {
     //getItemsCount
@@ -805,6 +817,7 @@ export const {
   setNotificationsLoaded,
   setContinents,
   setCurrentMessage,
+  setcreditResponse,
   setPopupIsOpen,
   setContinentsLoaded,
   setThemeColor,
@@ -859,6 +872,8 @@ export const {
   setAllowErrorChecksStatusUpdateForNewProcess,
   setNewProcessErrorMessage,
   setErrorsCheckedInNewProcess,
+  setApiKeyFetchFailureMessage,
+  setShowApiKeyFetchFailureModal,
 } = appSlice.actions;
 
 export default appSlice.reducer;
