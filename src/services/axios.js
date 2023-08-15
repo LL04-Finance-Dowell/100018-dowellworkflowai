@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const workflowAPIBaseURL = "https://74.50.67.58/v0.1/";
+const workflowAPIBaseURL = "https://workflowai.uxlivinglab.online/v0.1/";
 const loginBaseURL = "https://100014.pythonanywhere.com/api/";
 const legalBaseURL = "https://100087.pythonanywhere.com/api/";
 const locationAPIBaseUrl = "https://100074.pythonanywhere.com/";
