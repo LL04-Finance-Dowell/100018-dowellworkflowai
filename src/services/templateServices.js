@@ -5,8 +5,8 @@ export class TemplateServices {
     return httpTemplate.post('/', data);
   };
 
-  detailTemplate = (templateId) => {
-    return httpTemplate.get(`/${templateId}/`);
+  detailTemplate = (collection_id) => {
+    return httpTemplate.get(`/${collection_id}/`);
   };
 
   approvedTemplate = (data) => {
@@ -30,8 +30,11 @@ export class TemplateServices {
   };
 
   allTemplates = (companyId, dataType) => {
+    // return httpApiUrl.get(
+    //   `/companies/${companyId}/templates/?data_type=${dataType}`
+    // );
     return httpApiUrl.get(
-      `/companies/${companyId}/templates/?data_type=${dataType}`
+      `/companies/${companyId}/templates/metadata/?data_type=${dataType}`
     );
   };
 
