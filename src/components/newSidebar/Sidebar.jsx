@@ -198,7 +198,7 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
   // useEffect(() => {
   //   axios
   //     .get(
-  //       'https://100094.pythonanywhere.com/v1/companies/6385c0f38eca0fb652c9457e/templates/?='
+  //       'https://workflowai.uxlivinglab.online/v1/companies/6385c0f38eca0fb652c9457e/templates/?='
   //     )
   //     .then((response) => {
   //       const templateNames = response.data.templates.map(

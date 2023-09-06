@@ -75,11 +75,19 @@ const TemplatesPage = ({
   }, [userDetail]);
 
   useEffect(() => {
+<<<<<<< HEAD
 
   }, [allTemplatesArray])
 
   var reverseArray = [...allTemplatesArray].reverse()
  
+=======
+    console.log('allTemplatesArray: ', allTemplatesArray);
+  }, [allTemplatesArray])
+  console.log('allTemplatesArray: ', allTemplatesArray);
+   var reverseArray = [...allTemplatesArray].reverse()
+  console.log(reverseArray)
+>>>>>>> cb57d32cb2681c43a915af1af82b8bdbe401f805
 
   useEffect(() => {
     if (showOnlySaved) navigate('#saved-templates');
