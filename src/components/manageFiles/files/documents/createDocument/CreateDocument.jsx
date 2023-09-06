@@ -41,12 +41,13 @@ const CreateDocument = ({ handleToggleOverlay }) => {
     );
     if (!foundTemplateObj) return;
 
+
     const createDocumentData = {
       company_id: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.org_id : userDetail?.portfolio_info[0].org_id,
-      template_id: template,
+      template_id: foundTemplateObj.collection_id,
       created_by: userDetail?.userinfo.username,
       data_type: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find(portfolio => portfolio.product === productName)?.data_type : userDetail?.portfolio_info[0].data_type,
-      page: foundTemplateObj?.page,
+      // page: foundTemplateObj?.page,
       // content: foundTemplateObj?.content,
       portfolio: userDetail?.portfolio_info?.length > 1 ? userDetail?.portfolio_info.find((portfolio) => portfolio.product === productName)?.portfolio_name : userDetail?.portfolio_info[0].portfolio_name,
     };
@@ -100,25 +101,27 @@ const CreateDocument = ({ handleToggleOverlay }) => {
     dispatch(allTemplates(data));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  const reversedArray = [...allTemplatesArray].reverse();
+ 
   return (
     <Overlay title='Create Document' handleToggleOverlay={handleToggleOverlay}>
       {allTemplatesStatus === 'pending' ? (
         <Spinner />
-      ) : allTemplatesArray ? (
+      ) : reversedArray ? (
         <form onSubmit={handleSubmit(onSubmit)}>
           <div id='template' className={styles.dropdown__container}>
             <label onClick={handleClickLabel} htmlFor='template'>
               {t('Select Template')} <span>*</span>
             </label>
             <div style={{ position: 'relative' }}>
+
               <select
                 required
                 className={styles.ghost__input}
                 tabIndex={-98}
                 {...register('template')}
               >
-                {allTemplatesArray.map((item) => (
+                {reversedArray.map((item) => (
                   <option key={item._id} value={item._id}>
                     {item.template_name}
                   </option>
@@ -137,7 +140,7 @@ const CreateDocument = ({ handleToggleOverlay }) => {
             <div className={styles.dropdown__option__container}>
               <Collapse open={toggleDropdown}>
                 <div role='listbox' className={styles.dropdown__option__box}>
-                  {allTemplatesArray.map((item) => (
+                  {reversedArray.map((item) => (
                     <div
                       onClick={() => handleOptionClick(item)}
                       className={styles.dropdown__option__content}

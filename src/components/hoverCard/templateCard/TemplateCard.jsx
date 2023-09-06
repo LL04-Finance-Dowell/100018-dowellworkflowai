@@ -34,12 +34,15 @@ const TemplateCard = ({ cardItem, isFolder, folderId }) => {
   const [templateLoading, setTemplateLoading] = useState(false);
 
   const handleTemplateDetail = (item) => {
+    
     const data = {
-      template_id: item._id,
+
+      collection_id: item.collection_id,
       template_name: item.template_name,
     };
+   
 
-    dispatch(detailTemplate(data.template_id));
+    dispatch(detailTemplate(data.collection_id));
   };
 
   const handleFavoritess = async (item, actionType) => {
