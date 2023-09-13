@@ -198,7 +198,7 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
   // useEffect(() => {
   //   axios
   //     .get(
-  //       'https://workflowai.uxlivinglab.online/v1/companies/6385c0f38eca0fb652c9457e/templates/?='
+  //       'https://100094.pythonanywhere.com/v1/companies/6385c0f38eca0fb652c9457e/templates/?='
   //     )
   //     .then((response) => {
   //       const templateNames = response.data.templates.map(
@@ -323,7 +323,7 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
           )}
         </div>
       </div>
-      <Notifications />
+      <Notifications toggleSidebar={toggleSidebar} isMobile={isMobile} />
       <New toggleSidebar={toggleSidebar} isMobile={isMobile}/>
       <Search />
       <div className={styles.gap}></div>

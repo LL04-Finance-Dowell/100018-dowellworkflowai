@@ -11,6 +11,7 @@ import ChatIcon from "../../assets/chatting.png";
 
 const Chat = () => {
   const { session_id, userDetail } = useSelector((state) => state.auth);
+
   const { t } = useTranslation();
   const [apiMessages, setapiMessages] = useState([]);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -230,7 +231,7 @@ const Chat = () => {
             />{" "}
           </svg>
         </button>
-       
+
         {isPopupOpen && (
           <div className={styles.First_popuopAuto_Close}>
             <div

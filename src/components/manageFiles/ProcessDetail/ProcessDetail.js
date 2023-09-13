@@ -127,38 +127,25 @@ const Step = ({ step, index }) => {
         {step.stepName}
       </div>
 
-      {expanded ? (
-        <MdExpandLess
-          size={40}
-          className={styles.expand_icon}
-          onClick={() => setExpanded(false)}
-        />
-      ) : (
-        <MdExpandMore
-          size={40}
-          className={styles.expand_icon}
-          onClick={() => setExpanded(true)}
-        />
-      )}
-      {expanded && (
+      
+       
         <div className={styles.expanded}>
           <div>
-            <span>Public Member :</span><span> {step.stepPublicMembers.map((member, index) => {
-              return <span>{`${member.member}, `}</span>
-            })}</span>
+          <span>Public Member :</span><span>{step.stepPublicMembers.length}</span>
+
           </div>
           <div>
-            <span>Team Member :</span><span> {step.stepTeamMembers.map((member, index) => {
-              return <span>{`${member.member}, `}</span>
-            })}</span>
+          <span>Team Member :</span><span>{step.stepTeamMembers.length}</span>
+
           </div>
           <div>
-            <span>User Member :</span><span> {step.stepUserMembers.map((member, index) => {
-              return <span>{`${member.member}, `}</span>
-            })}</span>
+      
+          <span>User Member :</span><span>{step.stepUserMembers.length}</span>
+
+            
           </div>
         </div>
-      )}
+      
     </div>
   );
 };
