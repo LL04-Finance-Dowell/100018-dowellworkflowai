@@ -121,6 +121,7 @@ export const updateWorkflow = createAsyncThunk(
         newData._id,
         newData
       );
+        // console.log("the res is ", res)
       typeof res.data === 'string' && notify(changeToTitleCase(res.data));
 
       // thunkAPI.dispatch(removeFromMinedWf(updateData.workflow_id));
