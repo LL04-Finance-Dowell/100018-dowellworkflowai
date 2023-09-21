@@ -154,7 +154,7 @@ const DocumentCard = ({
         /*  dispatch(setEditorLink(response)); */
 
         // setDataLoading(false);
-        handleGoToEditor(response);
+        handleGoToEditor(response, item);
       } catch (error) {
         // console.log(error);
         setDataLoading(false);
@@ -188,7 +188,7 @@ const DocumentCard = ({
 
   };
 
-  const handleGoToEditor = async (link) => {
+  const handleGoToEditor = async (link, item) => {
     if (!link) return;
     const token = extractTokenFromVerificationURL(link);
     if (!token) return;
@@ -205,6 +205,7 @@ const DocumentCard = ({
       city: userDetail?.userinfo?.city,
       country: userDetail?.userinfo?.country,
       continent: userDetail?.userinfo?.timezone?.split('/')[0],
+      collection_id: item.collection_id
     };
 
     const sanitizedDataToPost = updateVerificationDataWithTimezone(dataToPost);
