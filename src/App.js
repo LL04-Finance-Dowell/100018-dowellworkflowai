@@ -29,7 +29,7 @@ import { productName } from './utils/helpers';
 import { useAppContext } from './contexts/AppContext';
 
 import axios from 'axios';
-// import ConstructionPage from './pages/ConstructionPage/ConstructionPage';
+import ConstructionPage from './pages/ConstructionPage/ConstructionPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -158,11 +158,11 @@ function App() {
   // console.log(creditResponse.data.service_id)
 
   // USE ONLY WHEN APP IS BROKEN OR UNDERGOING MAJOR CHANGES
-  // return (
-  //   <Routes>
-  //     <Route path='*' element={<ConstructionPage />} />
-  //   </Routes>
-  // );
+  return (
+    <Routes>
+      <Route path='*' element={<ConstructionPage />} />
+    </Routes>
+  );
 
   if (isPublicUser)
     return (
