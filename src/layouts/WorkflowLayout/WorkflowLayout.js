@@ -292,6 +292,9 @@ const WorkflowLayout = ({ children }) => {
                   </div>
                 )}
 
+                <div className={styles.children__box}>
+                  {children}
+                </div>
                 <div className={styles.chat_container}>
                 <Chat />
                 </div>
