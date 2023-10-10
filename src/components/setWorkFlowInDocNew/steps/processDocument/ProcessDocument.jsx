@@ -29,12 +29,18 @@ import {
 import { useTranslation } from "react-i18next";
 import { extractProcessObj } from "./utils/utils";
 
+//import reset copy data 
+import { resetCopyData } from "../../../../features/processCopyReducer";
+
 const ProcessDocument = ({ savedProcess, Process_title, setProcess_title }) => {
   // const [ScrollView , SetScrollView] = useState();
 
   // useEffect(() => {
   //   setCurrentProcess(processDocument[0]);
   // }, []);
+
+    ///import which doc or template approval
+    const whichApproval = useSelector((state)=> state.copyProcess.whichApproval)
 
   useEffect(() => {
     if (!savedProcess) return;
@@ -85,7 +91,7 @@ const ProcessDocument = ({ savedProcess, Process_title, setProcess_title }) => {
 
   const handleProcessBtnClick = async () => {
     if (!processOptionSelection || processOptionSelection === "Select") return;
-
+    dispatch(resetCopyData())
     if (!userDetail) return;
     if (!currentDocToWfs) {
       document
@@ -137,7 +143,8 @@ const ProcessDocument = ({ savedProcess, Process_title, setProcess_title }) => {
         teamMembersSelectedForProcess,
         publicMembersSelectedForProcess,
         userMembersSelectedForProcess,
-        true
+        true,
+     
       );
       setProcessObjectToSave(processObjToSave);
       dispatch(setAllowErrorChecksStatusUpdateForNewProcess(true));
@@ -154,7 +161,8 @@ const ProcessDocument = ({ savedProcess, Process_title, setProcess_title }) => {
       tableOfContentForStep,
       teamMembersSelectedForProcess,
       publicMembersSelectedForProcess,
-      userMembersSelectedForProcess
+      userMembersSelectedForProcess,
+
     );
 
     if (processObjToPost.error) {
@@ -251,7 +259,7 @@ const ProcessDocument = ({ savedProcess, Process_title, setProcess_title }) => {
     processObjToSaveCopy.parent_item_id = processObjToSave.parent_id;
     processObjToSaveCopy.processing_action = processOptionSelection;
     processObjToSaveCopy.processing_state = "draft";
-    processObjToSaveCopy.process_type = "document";
+    processObjToSaveCopy.process_type = whichApproval;
     processObjToSaveCopy.process_kind = "original";
     processObjToSaveCopy.workflow_construct_ids =
       processObjToSave.workflows_ids;

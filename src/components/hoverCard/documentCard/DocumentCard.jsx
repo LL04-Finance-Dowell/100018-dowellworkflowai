@@ -138,7 +138,7 @@ const DocumentCard = ({
   };
 
   const handleDetailDocumnet = async (item) => {
-  //  console.log("handle detail doc hit ", dataLoading)
+   console.log("handle detail doc hit ", dataLoading)
     if (dataLoading) return;
     if (documentLoading)
       return toast.info('Please wait for this document to be refreshed first');
@@ -272,7 +272,7 @@ const DocumentCard = ({
   };
 
   const handleFetchNewDocumentDetail = async (documentId) => {
-    // console.log("chkeinggggggggg")
+    console.log("chkeinggggggggg")
     if (documentLoading) return;
     if (dataLoading)
       return toast.info('Please wait for this document to open first');

@@ -141,7 +141,7 @@ const CreateWorkflows = ({ handleToggleOverlay }) => {
       delete newData?.workflows.data_type;
       newData.portfolio = newData.creator_portfolio;
       delete newData.creator_portfolio;
-      // console.log("the updated data is ", newData);
+      console.log("the updated data is ", newData);
 
 
       dispatch(updateWorkflow({ newData, notify, handleAfterCreated }));

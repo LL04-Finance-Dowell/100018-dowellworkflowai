@@ -106,7 +106,7 @@ const ProcessCard = ({ cardItem, title }) => {
   }
 
   const handleGetLinksClick = async (item) => {
-    // console.log("the item is ", item);
+    console.log("the item is ", item);
     // createProcessLinks(item._id, item.created_by);
     setPopupVisibility(false)
     setProcessLinkLoading(true);
@@ -148,7 +148,7 @@ const ProcessCard = ({ cardItem, title }) => {
       });
   }
   async function getProcessLinks(process_id) {
-    // console.log("the process id is ", process_id);
+    console.log("the process id is ", process_id);
     try {
       // const response = await fetch(`${api_url}processes/${process_id}/all-links/`);
       // if (!response.ok) {

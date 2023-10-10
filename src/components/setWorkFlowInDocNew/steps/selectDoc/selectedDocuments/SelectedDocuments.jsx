@@ -8,6 +8,9 @@ import { PrimaryButton } from '../../../../styledComponents/styledComponents';
 import styles from './selectedDocuments.module.css';
 import { useTranslation } from 'react-i18next';
 
+import { startCopyingWorkflow } from '../../../../../features/processCopyReducer';
+import { contentTemplate } from '../../../../../features/template/asyncThunks';
+
 const SelectedDocuments = ({
   selectedDocument,
   selectedDocuments,
@@ -22,26 +25,31 @@ const SelectedDocuments = ({
   const { t } = useTranslation();
   console.log(selectedDocuments.clones)
 
+    ///import which doc or template approval
+    const whichApproval = useSelector((state)=> state.copyProcess.whichApproval)
+
     ////copied docs
     const copiedDocument = useSelector((state) => state.copyProcess.document);
+    const startCopyingDoc = useSelector((state)=> state.copyProcess.startSelectDocument)
     useEffect(() => {
       if (!copiedDocument) return;
     
-      // console.log('Selection started!');
-      
-      // Set a 5-second delay before executing the following code
-      const timerId = setTimeout(() => {
-        dispatch(contentDocument(copiedDocument.collection_id));
-        dispatch(setCurrentDocToWfs(copiedDocument));
-        dispatch(setContentOfDocument(null));
-        // console.log('The button should be clicked');
-      }, 3000); // 5000 milliseconds = 5 seconds
+      // console.log('Selection started!', startCopyingDoc);
+
+      if(copiedDocument !==null && startCopyingDoc == true){
+        setTimeout(()=>{
+          dispatch(contentDocument(copiedDocument.collection_id));
+          dispatch(setCurrentDocToWfs(copiedDocument));
+          dispatch(setContentOfDocument(null));
+          dispatch(startCopyingWorkflow())
+          // console.log('document should be selected');
+        },3000)
+        
+      }
+
+    }, [copiedDocument, startCopyingDoc]);
     
-      // Clean up the timer if the copiedDocument changes or the component unmounts
-      return () => clearTimeout(timerId);
-    }, [copiedDocument]);
-    
-    
+    // console.log('the selected document is ', selectedDocument)
 
   const onSubmit = (data) => {
     if (!selectedDocument) return;
@@ -55,8 +63,16 @@ const SelectedDocuments = ({
 
     // const fetchData = { document_id: currentDocument?._id };
 
-    
-    dispatch(contentDocument(selectedDocument.collection_id));
+    if(whichApproval == 'Document'){
+     const item = 'documents'
+      dispatch(contentDocument({ collection_id: selectedDocument.collection_id, item }));
+    }
+    else{
+      const item = 'templates'
+      dispatch(contentDocument({ collection_id: selectedDocument.collection_id, item }));
+    }
+
+    // dispatch(contentDocument(selectedDocument.collection_id, whichApproval));
     dispatch(setCurrentDocToWfs(selectedDocument));
     dispatch(setContentOfDocument(null));
   };

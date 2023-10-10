@@ -247,7 +247,7 @@ const SectionBox = ({
           const savedProcessesInLocalStorage = JSON.parse(
             localStorage.getItem('user-saved-processes')
           );
-          // console.log('the res.data is ',res.data)
+          console.log('the res.data is ',res.data)
           if (savedProcessesInLocalStorage) {
             const processes = [
               ...savedProcessesInLocalStorage,
@@ -341,7 +341,7 @@ const SectionBox = ({
   useEffect(() => {
     setCardItemsVar(cardItems);
   }, [cardItems]);
-// console.log('the card items are ', cardItems)
+console.log('the card items are ', cardItems)
   return (
     <div className={styles.container}>
       <div className={styles.content__container}>

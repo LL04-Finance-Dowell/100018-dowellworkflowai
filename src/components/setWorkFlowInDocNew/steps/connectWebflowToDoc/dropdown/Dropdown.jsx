@@ -20,7 +20,7 @@ const Dropdown = ({ disableClick }) => {
 
       useEffect(()=>{
         const timerId = setTimeout(() => {
-          // console.log('entered drop down', wfToDocument.workflows)
+          console.log('entered drop down', wfToDocument.workflows)
         if (wfToDocument.workflows  && copiedWorkflow !==null) {
           dispatch(setDocCurrentWorkflow(wfToDocument.workflows[0]));
    
@@ -42,7 +42,7 @@ const Dropdown = ({ disableClick }) => {
     dispatch(setDropdowndToggle(false));
   };
 
-  // console.log("the wfToDocument.workflows are ",wfToDocument.workflows)
+  console.log("the wfToDocument.workflows are ",wfToDocument.workflows)
   
 
   return (

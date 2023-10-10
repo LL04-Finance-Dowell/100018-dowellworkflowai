@@ -485,11 +485,11 @@ const SelectMembersToAssign = ({
     name,
     radioValue
   ) => {
-    // console.log(" newRadioSelection",newRadioSelection,
-    //   "newGroupValue",newGroupValue,
-    //   "currentHeader",currentHeader,
-    //   "name",name,
-    //   "radioValue",radioValue)
+    console.log(" newRadioSelection",newRadioSelection,
+      "newGroupValue",newGroupValue,
+      "currentHeader",currentHeader,
+      "name",name,
+      "radioValue",radioValue)
     setCurrentGroupSelectionItem(newGroupValue);
     setCurrentRadioOptionSelection(newRadioSelection);
 

@@ -25,11 +25,12 @@ import VerificationPage from './pages/Verification/VerificationPage';
 import ProccessPage from './pages/Processes/AllProccessPage/ProcessesPage';
 import CopyProcessPage from './pages/Processes/CopyProcessPage';
 import SearchPage from './pages/Search/SearchPage';
+import EvaluationReportComponent from './components/manageFiles/ProcessDetail/StepDetail';
 import { productName } from './utils/helpers';
 import { useAppContext } from './contexts/AppContext';
 
 import axios from 'axios';
-import ConstructionPage from './pages/ConstructionPage/ConstructionPage';
+// import ConstructionPage from './pages/ConstructionPage/ConstructionPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -158,11 +159,11 @@ function App() {
   // console.log(creditResponse.data.service_id)
 
   // USE ONLY WHEN APP IS BROKEN OR UNDERGOING MAJOR CHANGES
-  return (
-    <Routes>
-      <Route path='*' element={<ConstructionPage />} />
-    </Routes>
-  );
+  // return (
+  //   <Routes>
+  //     <Route path='*' element={<ConstructionPage />} />
+  //   </Routes>
+  // );
 
   if (isPublicUser)
     return (
@@ -253,15 +254,23 @@ function App() {
             path={'active'}
             element={<ProccessPage showOnlyActive={true} />}
           />
-          <Route
+          <Route path={'processdetail'} element={<ProccessPage showSingleProcess={true} />}>
+          </Route>
+
+          <Route path="evaluation-report" element={<ProccessPage showEvaluationReport={true} />} />
+
+          {/* <Route
             path={'processdetail'}
             element={<ProccessPage showSingleProcess={true} />}
+          /> */}
+          <Route
+            path={'createprocess'}
+            element={<ProccessPage chooseProcess={true} />}
           />
           <Route
             path={'process-import/:process_id'}
             element={<CopyProcessPage />}
           />
-
 
           {/* <Route path={"trash"} element={<ProccessPage showOnlyTrashed={true} />}/> */}
         </Route>
