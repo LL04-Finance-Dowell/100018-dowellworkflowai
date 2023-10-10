@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/workflowai.online/static/css/main.6576e2b5.css",
-    "main.js": "/workflowai.online/static/js/main.c3a92adb.js",
+    "main.js": "/workflowai.online/static/js/main.bde30b1f.js",
     "static/js/787.1c6699c6.chunk.js": "/workflowai.online/static/js/787.1c6699c6.chunk.js",
     "static/media/greenImage.png": "/workflowai.online/static/media/greenImage.0bad90a2105988a2730d.png",
     "static/media/roboto-all-400-normal.woff": "/workflowai.online/static/media/roboto-all-400-normal.c5d001fa922fa66a147f.woff",
@@ -20,11 +20,11 @@
     "index.html": "/workflowai.online/index.html",
     "static/media/getFetch.cjs": "/workflowai.online/static/media/getFetch.40f37ddea2378391108f.cjs",
     "main.6576e2b5.css.map": "/workflowai.online/static/css/main.6576e2b5.css.map",
-    "main.c3a92adb.js.map": "/workflowai.online/static/js/main.c3a92adb.js.map",
+    "main.bde30b1f.js.map": "/workflowai.online/static/js/main.bde30b1f.js.map",
     "787.1c6699c6.chunk.js.map": "/workflowai.online/static/js/787.1c6699c6.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6576e2b5.css",
-    "static/js/main.c3a92adb.js"
+    "static/js/main.bde30b1f.js"
   ]
 }
