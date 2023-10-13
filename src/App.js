@@ -25,7 +25,6 @@ import VerificationPage from './pages/Verification/VerificationPage';
 import ProccessPage from './pages/Processes/AllProccessPage/ProcessesPage';
 import CopyProcessPage from './pages/Processes/CopyProcessPage';
 import SearchPage from './pages/Search/SearchPage';
-import EvaluationReportComponent from './components/manageFiles/ProcessDetail/StepDetail';
 import { productName } from './utils/helpers';
 import { useAppContext } from './contexts/AppContext';
 
@@ -218,6 +217,8 @@ function App() {
           <Route index element={<WorkflowsPage home={true} />} />
           <Route path={'set-workflow'} element={<SetWorkflowInDoc />} />
           <Route path={'new-set-workflow'} element={<SetWorkflowInDocNew />} />
+          <Route path={'new-set-workflow-document'} element={<SetWorkflowInDocNew />} />
+          <Route path={'new-set-workflow-template'} element={<SetWorkflowInDocNew />} />
           <Route
             path={'saved'}
             element={<WorkflowsPage showOnlySaved={true} />}
