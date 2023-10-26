@@ -133,7 +133,7 @@ const SelectMembersToAssign = ({
 
 
     useEffect(() => {
-      if (selectedMembersSet || !workflowTeamsLoaded || !usedIdsLoaded) return;
+      if (selectedMembersSet || !workflowTeamsLoaded ) return;
   
       const copyOfCurrentSelectMembersState = selectMembers.slice();
   
