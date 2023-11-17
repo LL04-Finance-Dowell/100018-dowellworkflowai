@@ -33,6 +33,7 @@ import { DocumentServices } from '../../../services/documentServices';
 import { MdOutlineFiberNew } from 'react-icons/md';
 import { IoIosRefresh } from 'react-icons/io';
 import { Tooltip } from 'react-tooltip';
+
 import AddRemoveBtn from '../AddRemoveBtn';
 
 const DocumentCard = ({
@@ -129,6 +130,12 @@ const DocumentCard = ({
     dispatch(setAllDocuments(copyOfAllDocuments));
 
     try {
+      await removeFromFavoritesState('documents', cardItem._id);
+      await deleteFavoriteForUser(
+        cardItem._id,
+        'document',
+        userDetail?.userinfo?.username
+      )
       const response = await (
         await moveItemToArchive(cardItem._id, 'document')
       ).data;
@@ -141,7 +148,7 @@ const DocumentCard = ({
   };
 
   const handleDetailDocumnet = async (item) => {
-   console.log("handle detail doc hit ", dataLoading)
+    console.log("handle detail doc hit ", dataLoading)
     if (dataLoading) return;
     if (documentLoading)
       return toast.info('Please wait for this document to be refreshed first');
@@ -179,17 +186,17 @@ const DocumentCard = ({
     const data = {
       document_name: item.document_name,
       collection_id: item.collection_id,
-      document_state:item.document_state
+      document_state: item.document_state
     };
 
     if (isCompletedDoc || isRejectedDoc) {
       dispatch(documentReport(data.collection_id))
       return
     }
- 
 
-      dispatch(detailDocument(data));
-   
+
+    dispatch(detailDocument(data));
+
 
   };
 
@@ -312,7 +319,7 @@ const DocumentCard = ({
       item_type: 'document',
       item_id: item?.collection_id || '653b5ba638ec7dcbdb556a38',
     };
-
+    console.log("generate pdf link")
     await axios.post(apiUrl, payload)
       .then((response) => {
         // Handle the API response here
@@ -357,7 +364,7 @@ const DocumentCard = ({
   const BackSide = () => {
     return (
       <div>
-        <div
+        {/* <div
             style={{
               cursor: 'pointer',
               position: 'absolute',
@@ -365,34 +372,56 @@ const DocumentCard = ({
               top: '0',
             }}
             onClick={() => generatePdfClick(cardItem)}
-          >{<BsArrowBarRight />}</div>
+          >{<BsArrowBarRight />}</div> */}
+
+        <Tooltip id={`generatePdf-${cardItem._id}`} content="generate pdf!" direction="up" arrowSize={10} style={{ backgroundColor: 'rgb(97, 206, 112)', color: 'white' }}></Tooltip>
+        <div
+          anchorId={cardItem._id}
+          data-tooltip-id={`generatePdf-${cardItem._id}`}
+          style={{
+            cursor: 'pointer',
+            position: 'absolute',
+            left: '0',
+            top: '0',
+          }}
+          onClick={() => generatePdfClick()}
+        >
+          <BsArrowBarRight />
+        </div>
+
         {!hideFavoriteIcon && (
-          <div
-            style={{
-              cursor: 'pointer',
-              position: 'absolute',
-              right: '0',
-              top: '0',
-            }}
-            onClick={() =>
-              handleFavoritess(
-                cardItem,
-                favoriteItems.documents.find(
-                  (item) => item._id === cardItem._id
+          <>
+            <Tooltip id={`faviorates-${cardItem._id}`} content="Add to Bookmark" direction="up" arrowSize={10} style={{ backgroundColor: 'rgb(97, 206, 112)', color: 'white' }}></Tooltip>
+            <div
+            anchorId={cardItem._id}
+            data-tooltip-id={`faviorates-${cardItem._id}`}
+              style={{
+                cursor: 'pointer',
+                position: 'absolute',
+                right: '0',
+                top: '0',
+              }}
+              onClick={() =>
+                handleFavoritess(
+                  cardItem,
+                  favoriteItems.documents.find(
+                    (item) => item._id === cardItem._id
+                  )
+                    ? 'remove'
+                    : 'add'
                 )
-                  ? 'remove'
-                  : 'add'
-              )
-            }
-          >
-            {favoriteItems.documents.find(
-              (item) => item._id === cardItem._id
-            ) ? (
-              <BsFillBookmarkFill />
-            ) : (
-              <BsBookmark />
-            )}
-          </div>
+              }
+            >
+
+              {favoriteItems.documents.find(
+                (item) => item._id === cardItem._id
+              ) ? (
+                <BsFillBookmarkFill />
+              ) : (
+                <BsBookmark />
+              )}
+            </div>
+          </>
         )}
         {cardItem._id ? (
           <Button onClick={() => handleDetailDocumnet(cardItem)}>
@@ -408,17 +437,22 @@ const DocumentCard = ({
           'no item'
         )}
         {!hideDeleteIcon && (
-          <div
-            style={{
-              cursor: 'pointer',
-              position: 'absolute',
-              right: '0',
-              bottom: '0',
-            }}
-            onClick={() => handleTrashDocument(cardItem)}
-          >
-            <RiDeleteBin6Line color='red' />
-          </div>
+          <>
+            <Tooltip id={`delete-${cardItem._id}`} content="Delete Document" direction="up" arrowSize={10} style={{ backgroundColor: 'rgb(97, 206, 112)', color: 'white' }}></Tooltip>
+            <div
+              anchorId={cardItem._id}
+              data-tooltip-id={`delete-${cardItem._id}`}
+              style={{
+                cursor: 'pointer',
+                position: 'absolute',
+                right: '0',
+                bottom: '0',
+              }}
+              onClick={() => handleTrashDocument(cardItem)}
+            >
+              <RiDeleteBin6Line color='red' />
+            </div>
+          </>
         )}
         {cardItem.newly_created && (
           <div
@@ -472,7 +506,10 @@ const DocumentCard = ({
           </div>
         )}
 
+        <Tooltip id={`add-${cardItem._id}`} content="Add Document" direction="up" arrowSize={10} style={{ backgroundColor: 'rgb(97, 206, 112)', color: 'white' }}></Tooltip>
         <div
+        anchorId={cardItem._id}
+        data-tooltip-id={`add-${cardItem._id}`}
           style={{
             position: 'absolute',
             bottom: '0',

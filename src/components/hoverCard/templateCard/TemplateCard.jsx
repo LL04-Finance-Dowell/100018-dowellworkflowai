@@ -34,7 +34,6 @@ const TemplateCard = ({ cardItem, isFolder, folderId }) => {
   const [templateLoading, setTemplateLoading] = useState(false);
 
   const handleTemplateDetail = (item) => {
-    
     const data = {
 
       collection_id: item.collection_id,
@@ -106,6 +105,12 @@ const TemplateCard = ({ cardItem, isFolder, folderId }) => {
     dispatch(setAllTemplates(copyOfAllTemplates));
 
     try {
+      await removeFromFavoritesState('templates', cardItem._id);
+      await deleteFavoriteForUser(
+        cardItem._id,
+        'template',
+        userDetail?.userinfo?.username
+      )
       const response = await (
         await moveItemToArchive(cardItem._id, 'template')
       ).data;
@@ -171,7 +176,10 @@ const TemplateCard = ({ cardItem, isFolder, folderId }) => {
   const BackSide = () => {
     return (
       <div>
+        <Tooltip id={`book-${cardItem._id}`} content="Bookmark Template" direction="up" arrowSize={10} style={{ backgroundColor: 'rgb(97, 206, 112)', color: 'white' }}></Tooltip>
         <div
+        anchorId={cardItem._id}
+        data-tooltip-id={`book-${cardItem._id}`}
           style={{
             cursor: 'pointer',
             position: 'absolute',
@@ -200,7 +208,10 @@ const TemplateCard = ({ cardItem, isFolder, folderId }) => {
         ) : (
           'no item'
         )}
+        <Tooltip id={`dell-${cardItem._id}`} content="Delete Template" direction="up" arrowSize={10} style={{ backgroundColor: 'rgb(97, 206, 112)', color: 'white' }}></Tooltip>
         <div
+         anchorId={cardItem._id}
+         data-tooltip-id={`dell-${cardItem._id}`}
           style={{
             cursor: 'pointer',
             position: 'absolute',
@@ -262,8 +273,10 @@ const TemplateCard = ({ cardItem, isFolder, folderId }) => {
             </div>
           </div>
         )}
-
+        <Tooltip id={`add-${cardItem._id}`} content="Add Template" direction="up" arrowSize={10} style={{ backgroundColor: 'rgb(97, 206, 112)', color: 'white' }}></Tooltip>
         <div
+         anchorId={cardItem._id}
+         data-tooltip-id={`add-${cardItem._id}`}
           style={{
             position: 'absolute',
             bottom: '0',
