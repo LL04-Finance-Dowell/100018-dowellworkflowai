@@ -1,6 +1,7 @@
 .dropdown__container {
   position: relative;
   color: var(--e-global-color-secondary);
+  width: 350px;   /* Set the width */
 }
 
 .ghost__input {
@@ -72,7 +73,7 @@
 }
 
 .dropdown__option__content {
-  height: 40px;
+  height: auto;
   background-color: var(--e-global-color-cd6593d);
   display: flex;
   width: 100%;
