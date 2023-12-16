@@ -302,7 +302,7 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
             <Tooltip
               anchorId={item.id}
               content={item.label}
-              style={{ fontStyle: "normal" }}
+              style={{ fontStyle: "normal", backgroundColor: 'rgb(97, 206, 112)'}}
             />
           </i>
         ))}
