@@ -37,6 +37,7 @@ const SectionBox = ({
   isReports,
   isCompleted,
   isRejected,
+  isReport,
 }) => {
   const [sliceCount, setSliceCount] = useState(1);
   const [refreshLoading, setRefreshLoading] = useState(false);
@@ -493,7 +494,7 @@ const handleFilterChange = (event) => {
               ) : itemType === 'processes' ? (
                 !processesLoading ? (
                   <div  className={styles.RightBox}>
-                    {cardItems.length > 10? 
+                    {cardItems?.length > 10 ? 
                     <div className={styles.search__item__wrapper} >
                        <input
                           type="text"
@@ -502,7 +503,7 @@ const handleFilterChange = (event) => {
                           onChange={handleFilterChange}
                           className={styles.search__item}
                         />
-                    </div>:""  
+                    </div> : ""  
                     }
                     <button
                       className={styles.refresh__btn}
@@ -610,6 +611,7 @@ const handleFilterChange = (event) => {
                           folderId={folderId}
                           isCompletedDoc={isCompleted}
                           isRejectedDoc={isRejected}
+                          isReport={isReport}
                         />
                       ))}
                 </div>
