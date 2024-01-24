@@ -85,6 +85,8 @@ const initialState = {
   ProcessDetail:[],
   ShowDocumentReport: [],
   SingleDocument: [],
+  KnowledgeFolders: [],
+  KnowledgeFolderTemplates: [],
   ShowProcessNameModal:false,
   linksFetched: false,
   DetailFetched:false,
@@ -698,6 +700,12 @@ export const appSlice = createSlice({
     SetSingleDocument: (state, action) => {
       state.SingleDocument = action.payload;
     },
+    SetKnowledgeFolders: (state, action) => {
+      state.KnowledgeFolders = action.payload;
+    },
+    SetKnowledgeFoldersTemplates: (state, action) => {
+      state.KnowledgeFolderTemplates = action.payload;
+    },
     setShowProfileSpinner: (state, action) => {
       state.ShowProfileSpinner = action.payload;
     },
@@ -876,6 +884,8 @@ export const {
   SetProcessDetail,
   SetShowDocumentReport,
   SetSingleDocument,
+  SetKnowledgeFolders,
+  SetKnowledgeFoldersTemplates,
   setDetailFetched,
   setshowsProcessDetailPopup,
   setLinksFetched,
