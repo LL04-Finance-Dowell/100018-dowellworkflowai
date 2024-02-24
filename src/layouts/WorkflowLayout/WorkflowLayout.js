@@ -118,7 +118,7 @@ const WorkflowLayout = ({ children }) => {
   //     })
   //   );
 
-    console.log(userDetailPosition)
+    // console.log(userDetailPosition)
     dispatch(setUserDetailPosition(userDetailPosition));
   };
 
@@ -208,15 +208,15 @@ const WorkflowLayout = ({ children }) => {
         product: workflowProduct.product,
       })
       .then((res) => {
-        console.log("res.datamubeen", res.data)
+        // console.log("res.datamubeen", res.data)
         dispatch(updateUserDetail(res.data));
         dispatch(setAdminUserPortfolioLoaded(true));
       })
       .catch((err) => {
-        console.log(
-          'Failed to update admin user: ',
-          err.response ? err.response.data : err.message
-        );
+        // console.log(
+        //   'Failed to update admin user: ',
+        //   err.response ? err.response.data : err.message
+        // );
         dispatch(setAdminUserPortfolioLoaded(true));
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -236,7 +236,7 @@ const WorkflowLayout = ({ children }) => {
       if (!demoTemplates) {
         fetchDemoTemplates();
       }
-      // console.log('the demoTemplates in layout are ', demoTemplates)
+      // // console.log('the demoTemplates in layout are ', demoTemplates)
       if(demoTemplates !== null){
         setSearchItems((prevItems) => {
           return [...prevItems, ...demoTemplates];
@@ -337,6 +337,9 @@ const WorkflowLayout = ({ children }) => {
                 )}
 
                 <div className={styles.children__box}>
+                  <p className={styles.beta__Info__Text}>
+                    {t('You are on the beta version of workflow.ai')}
+                  </p>
                   {
                     creditResponse?.is_active == false   || creditResponse?.total_credits < 100 ?
                     <p className={styles.workflow_check}>

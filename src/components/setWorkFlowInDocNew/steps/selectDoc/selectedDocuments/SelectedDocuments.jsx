@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentDocToWfs } from '../../../../../features/app/appSlice';
-import { contentDocument } from '../../../../../features/document/asyncThunks';
+import { contentDocument, contentDocumentStep} from '../../../../../features/document/asyncThunks';
 import { setContentOfDocument } from '../../../../../features/document/documentSlice';
 import { PrimaryButton } from '../../../../styledComponents/styledComponents';
 import styles from './selectedDocuments.module.css';
@@ -23,13 +23,15 @@ const SelectedDocuments = ({
   } = useForm();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  console.log(selectedDocuments.clones)
+  // console.log(selectedDocuments.clones)
 
     ///import which doc or template approval
     // const whichApproval = useSelector((state)=> state.copyProcess.whichApproval)
     const currentURL = window.location.href;
     const parts = currentURL.split('/'); 
     const whichApproval =  parts[parts.length - 1];
+    const whichApprovalStep =  parts[parts.length - 1];
+
 
     ////copied docs
     const copiedDocument = useSelector((state) => state.copyProcess.document);
@@ -37,24 +39,24 @@ const SelectedDocuments = ({
     useEffect(() => {
       if (!copiedDocument) return;
     
-      // console.log('Selection started!', startCopyingDoc);
+      // // console.log('Selection started!', startCopyingDoc);
 
       if(copiedDocument !==null && startCopyingDoc == true){
         setTimeout(()=>{
-          // console.log('for the test the collectionid is ',copiedDocument.collection_id)
+          // // console.log('for the test the collectionid is ',copiedDocument.collection_id)
           const item = 'documents'
           dispatch(contentDocument({collection_id:copiedDocument.collection_id, item}));
           dispatch(setCurrentDocToWfs(copiedDocument));
           dispatch(setContentOfDocument(null));
           dispatch(startCopyingWorkflow())
-          // console.log('document should be selected');
+          // // console.log('document should be selected');
         },3000)
         
       }
 
     }, [copiedDocument, startCopyingDoc]);
     
-    // console.log('the selected document is ', selectedDocument)
+    // // console.log('the selected document is ', selectedDocument)
 
   const onSubmit = (data) => {
     if (!selectedDocument) return;
@@ -71,6 +73,10 @@ const SelectedDocuments = ({
     if(whichApproval == 'new-set-workflow-document'){
      const item = 'documents'
       dispatch(contentDocument({ collection_id: selectedDocument.collection_id, item }));
+    }
+    else if(whichApprovalStep == 'new-set-workflow-document-step'){
+      const item = 'clone'
+      dispatch(contentDocumentStep({ collection_id: selectedDocument._id, item }));
     }
     else{
       const item = 'templates'

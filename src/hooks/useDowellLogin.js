@@ -38,12 +38,12 @@ export default function useDowellLogin() {
     
     if (passedId) {
       navigate(`/?session_id=${passedSessionId}&id=${passedId}`)
-      window.history.replaceState({}, document.title, "/workflowai.online/");
+      // window.history.replaceState({}, document.title, "/workflowai.online/");
       return
     }
 
     navigate(`/?session_id=${passedSessionId}`);
-    window.history.replaceState({}, document.title, "/workflowai.online/");
+    // window.history.replaceState({}, document.title, "/workflowai.online/");
   }
 
   const extractTokenFromURLAndNavigateToVerificationPage = (url, session_id, id=null, detailsConfigured=false) => {
@@ -73,7 +73,7 @@ export default function useDowellLogin() {
     if (!token) {
       dispatch(setShowProfileSpinner(false));
       navigate(`/?session_id=${session_id}`)
-      window.history.replaceState({}, document.title, "/workflowai.online/");
+      // window.history.replaceState({}, document.title, "/workflowai.online/");
       return;
     }
 
@@ -103,7 +103,7 @@ export default function useDowellLogin() {
         )
 
       }).catch(error => {
-        console.log(error);
+        // console.log(error);
       })
 
       return
@@ -128,7 +128,7 @@ export default function useDowellLogin() {
       return
 
     }).catch(error => {
-      console.log(error);
+      // console.log(error);
     })
   }
 
@@ -164,7 +164,7 @@ export default function useDowellLogin() {
 
     if (session_id) {
       // remove session_id and/or id from url
-      window.history.replaceState({}, document.title, "/workflowai.online/");
+      // window.history.replaceState({}, document.title, "/workflowai.online/");
 
       sessionStorage.clear();
 

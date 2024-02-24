@@ -113,7 +113,7 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
   const { userDetail, session_id } = useSelector((state) => state.auth);
   const { IconColor, ShowProfileSpinner, themeColor, creditResponse } =
     useSelector((state) => state.app);
-  // console.log(creditResponse && creditResponse.data)
+  // // console.log(creditResponse && creditResponse.data)
   const navigate = useNavigate();
   useCloseElementOnEscapekeyClick(() =>
     dispatch(setLegalAgreePageLoading(false))
@@ -134,7 +134,7 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
         // if (!legalStatus) setShowLegalPopup(true);
       })
       .catch((error) => {
-        console.log(error.response ? error.response.data : error.message);
+        // console.log(error.response ? error.response.data : error.message);
         dispatch(setLegalStatusLoading(false));
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -223,8 +223,8 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
   //       // Handle any errors
   //     });
   // }, []);
-  // console.log(creditResponse.data.is_active)
-  // console.log(creditResponse.data.service_id)
+  // // console.log(creditResponse.data.is_active)
+  // // console.log(creditResponse.data.service_id)
 
   const location = useLocation();
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -260,7 +260,7 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
   const handleLinkClick = (e) => {
     e.preventDefault(); // Prevent the default link behavior
     const routePart = e.currentTarget.getAttribute('href');
-    console.log("routePart", routePart)
+    // console.log("routePart", routePart)
     // navigate("/templates/demo#demo")
   };
 
@@ -402,7 +402,7 @@ const Sidebar = ({toggleSidebar, isMobile}) => {
         {/* <CollapseItem items={knowledge} exception={true} /> */}
 
         <span className={styles.knowledge__Extra__Info}>
-          {t("DoWell")} {t("True moments user experience lab")}
+          {t("DoWell")} {t("True Moments User Experience Lab")}
         </span>
       </div>
       <Footer topSideIcons={iconBoxItems} handleIconClick={handleClick} />

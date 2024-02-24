@@ -21,7 +21,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import AssignTask from './contents/selectMembersToAssign/assignTask/AssignTask';
 
-const ConnectWorkFlowToDoc = ({ stepsPopulated, savedProcessSteps }) => {
+const ConnectWorkFlowToDoc = ({ stepsPopulated, savedProcessSteps, addWorkflowStep }) => {
   const { register } = useForm();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated, savedProcessSteps }) => {
 
     ////copied process
     const copiedProcess = useSelector((state) => state.copyProcess.processStep);
-  // console.log('the copied procesSteps are ', copiedProcess)
+  // // console.log('the copied procesSteps are ', copiedProcess)
   const { docCurrentWorkflow, processSteps } = useSelector(
     (state) => state.app
   );
@@ -208,7 +208,7 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated, savedProcessSteps }) => {
   };
 
   const handleResetStepAndSuccessors = (indexPassed) => {
-    console.log('resetting...');
+    // console.log('resetting...');
   };
 
   const handleSetStepAndProceedToNext = (
@@ -233,7 +233,7 @@ const ConnectWorkFlowToDoc = ({ stepsPopulated, savedProcessSteps }) => {
       if (foundNextStepElem) foundNextStepElem.scrollIntoView();
     }
   };
-console.log("the stepsPopulated are ", stepsPopulated)
+// console.log("the stepsPopulated are ", stepsPopulated)
   return (
     <>
       <div className={styles.container}>
@@ -247,7 +247,7 @@ console.log("the stepsPopulated are ", stepsPopulated)
           </div>
         ) : (
           <>
-            <Dropdown disableClick={stepsPopulated ? true : false} />
+            <Dropdown addWorkflowStep={addWorkflowStep} disableClick={stepsPopulated ? true : false} />
             {docCurrentWorkflow && (
               <div className={styles.step__container}>
                 {currentSteps &&
