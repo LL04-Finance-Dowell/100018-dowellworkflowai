@@ -114,8 +114,8 @@ const VerificationPage = () => {
     if (dataIsPosting) return
 
     setDataIsPosting(true);
-
-    verifyProcessForUser(sanitizedDataToPost)
+    const processID =  window.location.href.split('verify/')[1]?.split('/')[0]
+    verifyProcessForUser(processID,sanitizedDataToPost)
       .then((res) => {
         setLoading(false);
         window.location = 
