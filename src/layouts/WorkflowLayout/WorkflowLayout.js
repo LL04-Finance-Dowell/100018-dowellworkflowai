@@ -337,9 +337,7 @@ const WorkflowLayout = ({ children }) => {
                 )}
 
                 <div className={styles.children__box}>
-                  <p className={styles.beta__Info__Text}>
-                    {t('You are on the beta version of workflow.ai')}
-                  </p>
+             
                   {
                     creditResponse?.is_active == false   || creditResponse?.total_credits < 100 ?
                     <p className={styles.workflow_check}>
