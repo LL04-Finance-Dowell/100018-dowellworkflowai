@@ -1,8 +1,7 @@
 import styles from './sectionBox.module.css';
-import LoadingScreen from '../../LoadingScreen/loadingScreen';
 import maneFilesStyles from '../manageFiles.module.css';
 import BookSpinner from '../../bookSpinner/BookSpinner';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 import { PrimaryButton } from '../../styledComponents/styledComponents';
 import { IoIosRefresh } from 'react-icons/io';
@@ -27,7 +26,6 @@ import {
 } from '../../../features/app/appSlice';
 import axios from 'axios';
 import { setNotificationsForUser } from '../../../features/notifications/notificationSlice';
-
 const SectionBox = ({
   cardItems,
   title,
@@ -48,9 +46,8 @@ const SectionBox = ({
   const [sliceCount, setSliceCount] = useState(1);
   const [refreshLoading, setRefreshLoading] = useState(false);
   const { userDetail } = useSelector((state) => state.auth);
-  const { processesLoading } =
+  const { processesLoading, notificationsForUser, notificationsLoading } =
     useSelector((state) => state.app);
-  const { notificationsForUser, notificationsLoading } = useSelector(state => state.notification);
   const { allDocumentsStatus } = useSelector((state) => state.document);
   const { allTemplatesStatus } = useSelector((state) => state.template);
   const { allWorkflowsStatus } = useSelector((state) => state.workflow);
@@ -60,7 +57,6 @@ const SectionBox = ({
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [cardItemsVar, setCardItemsVar] = useState(cardItems);
   const [count, setCount] = useState(1);
-  const [loadMoreDisabled, setLoadMoreDisabled] = useState(false);
   const {
     fetchDemoTemplates,
     fetchDemoDocuments,
@@ -73,40 +69,13 @@ const SectionBox = ({
     fetchFolders
   } = useAppContext();
 
-  // const handleLoadMore = () => {
-  //   setSliceCount((prev) => prev + 1);
-  // };
-
-  // const bottomOfPageRef = useRef();
-
-  // useEffect(() => {
-  //   const observer = new IntersectionObserver(
-  //     ([entry]) => {
-  //       if (entry.isIntersecting && !loadMoreDisabled) {
-  //         handleDemoLoadMore();
-  //       }
-  //     },
-  //     {
-  //       root: null,
-  //       rootMargin: '0px',
-  //       threshold: 0.5,
-  //     }
-  //   );
-
-  //   if (bottomOfPageRef.current) {
-  //     observer.observe(bottomOfPageRef.current);
-  //   }
-
-  //   return () => {
-  //     if (bottomOfPageRef.current) {
-  //       observer.unobserve(bottomOfPageRef.current);
-  //     }
-  //   };
-  // }, [loadMoreDisabled]);
+  const handleLoadMore = () => {
+    setSliceCount((prev) => prev + 1);
+  };
 
   const handleDemoLoadMore = async () => {
-     
-    if (cardItemsVar?.length / 18 > sliceCount) {
+
+    if (cardItemsVar?.length / 10 > sliceCount) {
       setSliceCount((prev) => prev + 1);
     } else {
       setIsDemoLoading(true);
@@ -122,15 +91,25 @@ const SectionBox = ({
         );
         setCount(count + 1);
       } catch (err) {
-        console.log(err);
+        // console.log(err);
       } finally {
         setIsDemoLoading(false);
       }
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isDemoLoading) {
+        handleDemoLoadMore();
+      }
+    }, 2000); // 2000 milliseconds = 2 seconds
+
+    return () => clearTimeout(timer); // Cleanup function to clear timer if component unmounts or sliceCount changes
+  }, [sliceCount]);
+
   // useEffect(() => {
-  //   console.log('cardItemsVar: ', cardItemsVar);
+  //   // console.log('cardItemsVar: ', cardItemsVar);
   // }, [cardItemsVar]);
 
   const handleRefresh = () => {
@@ -171,9 +150,8 @@ const SectionBox = ({
       if (isDemo) fetchDemoDocuments();
       else if (isCompleted && !window.location.hash.includes('completed#org')) fetchDocumentReports('finalized');
       else if (isCompleted && window.location.hash.includes('completed#org')) fetchOrgDocumentReports('finalized');
-      // else if (isRejected && !window.location.hash.includes('rejected#org')) fetchDocumentReports('rejected');
-      // else if (isRejected && window.location.hash.includes('rejected#org')) fetchOrgDocumentReports('rejected');
-
+      else if (isRejected && !window.location.hash.includes('rejected#org')) fetchDocumentReports('rejected');
+      else if (isRejected && window.location.hash.includes('rejected#org')) fetchOrgDocumentReports('rejected');
       else {
         documentServices
           .allDocuments(data.company_id, data.data_type)
@@ -194,56 +172,13 @@ const SectionBox = ({
             setRefreshLoading(false);
           })
           .catch((err) => {
-            // console.log(err, 'Refresh for documents failed');
+            // // console.log(err, 'Refresh for documents failed');
             toast.info('Refresh for documents failed');
             setRefreshLoading(false);
           });
       }
       setRefreshLoading(false);
-    // }
-
-    // if (itemType === 'documents') {
-    //   setRefreshLoading(true);
-  
-    //   const data = {
-    //       company_id: currentUserCompanyId,
-    //       data_type: currentUserportfolioDataType,
-    //   };
-  
-    //   const documentServices = new DocumentServices();
-  
-    //   if (isDemo) {
-    //       fetchDemoDocuments();
-    //   } else if (isCompleted && window.location.hash.includes('completed#org')) {
-    //       fetchOrgDocumentReports('finalized');
-    //   } else if (isRejected && window.location.hash.includes('rejected#org')) {
-    //       fetchOrgDocumentReports('rejected');
-    //   } else {
-    //       documentServices
-    //           .allDocuments(data.company_id, data.data_type)
-    //           .then((res) => {
-    //               dispatch(
-    //                   setAllDocuments(
-    //                       res.data.documents
-    //                           .filter(
-    //                               (document) =>
-    //                               document.document_state !== 'trash' &&
-    //                               document.data_type &&
-    //                               document.data_type === currentUserportfolioDataType
-    //                           )
-    //                   )
-    //               );
-    //               toast.success('Successfully refreshed documents');
-    //               setRefreshLoading(false);
-    //           })
-    //           .catch((err) => {
-    //               // console.log(err, 'Refresh for documents failed');
-    //               toast.info('Refresh for documents failed');
-    //               setRefreshLoading(false);
-    //           });
-    //   }
-  }
-  
+    }
 
     if (itemType === 'templates') {
       setRefreshLoading(true);
@@ -276,7 +211,7 @@ const SectionBox = ({
             setRefreshLoading(false);
           })
           .catch((err) => {
-            // console.log(err, 'Refresh for templates failed');
+            // // console.log(err, 'Refresh for templates failed');
             toast.info('Refresh for templates failed');
             setRefreshLoading(false);
           });
@@ -312,7 +247,7 @@ const SectionBox = ({
           setRefreshLoading(false);
         })
         .catch((err) => {
-          // console.log(err, 'Refresh for workflows failed');
+          // // console.log(err, 'Refresh for workflows failed');
           toast.info('Refresh for workflows failed');
           setRefreshLoading(false);
         });
@@ -331,7 +266,7 @@ const SectionBox = ({
           const savedProcessesInLocalStorage = JSON.parse(
             localStorage.getItem('user-saved-processes')
           );
-          console.log('the res.data is ', res.data)
+          // console.log('the res.data is ', res.data)
           if (savedProcessesInLocalStorage) {
             const processes = [
               ...savedProcessesInLocalStorage,
@@ -349,7 +284,7 @@ const SectionBox = ({
           setRefreshLoading(false);
         })
         .catch((err) => {
-          // console.log(err, 'Refresh for processes failed');
+          // // console.log(err, 'Refresh for processes failed');
           toast.info('Refresh for processes failed');
           setRefreshLoading(false);
         });
@@ -367,7 +302,7 @@ const SectionBox = ({
         axios.get(url)
           .then(response => {
             dispatch(SetKnowledgeFolders(response.data));
-            console.log('Data:', response.data);
+            // console.log('Data:', response.data);
             toast.info("page refreshed successfully")
             // Handle the response data
           })
@@ -434,13 +369,13 @@ const SectionBox = ({
               return notification;
             }
           );
-          // console.log(updatedNotifications);
+          // // console.log(updatedNotifications);
           dispatch(setNotificationsForUser(updatedNotifications));
           toast.success('Successfully refreshed notifications');
           setRefreshLoading(false);
         })
         .catch((err) => {
-          // console.log(err, 'Refresh for notifications failed');
+          // // console.log(err, 'Refresh for notifications failed');
           toast.info('Refresh for notifications failed');
           setRefreshLoading(false);
         });
@@ -449,31 +384,9 @@ const SectionBox = ({
 
   useEffect(() => {
     setCardItemsVar(cardItems);
+    // console.log("1 mubeen")
   }, [cardItems]);
-  // console.log("cardItemsVar", cardItems);
-
-  // useEffect(() => {
-  //   if (cardItemsVar && cardItemsVar.length > 20) {
-  //     setTimeout(() => {
-  //       setSliceCount(2);
-  //       // setLoadMoreDisabled(false);
-  //     }, 3000);
-  //   }
-  // }, [cardItemsVar]);
-
-  useEffect(() => {
-    if (cardItemsVar && cardItemsVar.length > 20) {
-      const intervalId = setInterval(() => {
-        if (cardItemsVar?.length / 12 > sliceCount) {
-          setSliceCount((prev) => prev + 1);
-        } else {
-          clearInterval(intervalId);
-          setLoadMoreDisabled(true);
-        }
-      }, 2000);
-      return () => clearInterval(intervalId);
-    }
-  }, [cardItemsVar, sliceCount]);
+  // console.log('the card items are ', cardItems)
 
   const handleFilterChange = (event) => {
     setFilterName(event.target.value);
@@ -498,92 +411,295 @@ const SectionBox = ({
       const filteredItems = cardItems.filter(item => item.folder_name.toLowerCase().includes(event.target.value.toLowerCase()));
       setCardItemsVar(filteredItems);
     }
+
+
   };
+
+  // console.log("cardItemsVar", cardItems)
 
   return (
     <div className={styles.container}>
       <div className={styles.content__container}>
         <div className={styles.content__box}>
-          <h2 className={maneFilesStyles.header} id={idKey ? title.replaceAll(' ', '') + '-' + idKey : ''}>
+          <h2
+            className={maneFilesStyles.header}
+            id={idKey ? title.replaceAll(' ', '') + '-' + idKey : ''}
+
+          >
             {t(title)}
-            {/* Refresh button and search input */}
-            {itemType &&
-              ((itemType === 'documents' && allDocumentsStatus !== 'pending') ||
-                (itemType === 'templates' && allTemplatesStatus !== 'pending') ||
-                (itemType === 'workflows' && allWorkflowsStatus !== 'pending') ||
-                (itemType === 'processes' && !processesLoading) ||
-                (itemType === 'folders' && !isFetchingFolders) ||
-                (itemType === 'notifications' && !notificationsLoading)) && (
-                <div className={styles.RightBox}>
-                  {cardItems?.length > 10 && (
-                    <div className={styles.search__item__wrapper}>
-                      <input
-                        type="text"
-                        placeholder="Filter by name"
-                        value={filterName}
-                        onChange={handleFilterChange}
-                        className={styles.search__item}
-                      />
-                    </div>
-                  )}
-                  <button className={styles.refresh__btn} onClick={handleRefresh}>
-                    {refreshLoading ? (
-                      <LoadingSpinner color={'white'} width={'1rem'} height={'1rem'} />
-                    ) : (
-                      <IoIosRefresh />
-                    )}
-                    <span>{t('Refresh')}</span>
-                  </button>
-                </div>
-              )}
+            {itemType ? (
+              itemType === 'documents' ? (
+                allDocumentsStatus !== 'pending' ? (
+                  <div className={styles.RightBox}>
+                    {cardItems?.length > 10 ?
+                      <div className={styles.search__item__wrapper} >
+                        <input
+                          type="text"
+                          placeholder="Filter by name"
+                          value={filterName}
+                          onChange={handleFilterChange}
+                          className={styles.search__item}
+                        />
+                      </div> : ""
+                    }
+                    <button
+                      className={styles.refresh__btn}
+                      onClick={handleRefresh}
+                    >
+                      {refreshLoading ? (
+                        <LoadingSpinner
+                          color={'white'}
+                          width={'1rem'}
+                          height={'1rem'}
+                        />
+                      ) : (
+                        <IoIosRefresh />
+                      )}
+                      <span>{t('Refresh')}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )
+              ) : itemType === 'templates' ? (
+                allTemplatesStatus !== 'pending' ? (
+                  <div className={styles.RightBox}>
+                    {cardItems?.length > 10 ?
+                      <div className={styles.search__item__wrapper} >
+                        <input
+                          type="text"
+                          placeholder="Filter by name"
+                          value={filterName}
+                          onChange={handleFilterChange}
+                          className={styles.search__item}
+                        />
+                      </div> : ""
+                    }
+                    <button
+                      className={styles.refresh__btn}
+                      onClick={handleRefresh}
+                    >
+                      {refreshLoading ? (
+                        <LoadingSpinner
+                          color={'white'}
+                          width={'1rem'}
+                          height={'1rem'}
+                        />
+                      ) : (
+                        <IoIosRefresh />
+                      )}
+                      <span>Refresh</span>
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )
+              ) : itemType === 'workflows' ? (
+                allWorkflowsStatus !== 'pending' ? (
+                  <div className={styles.RightBox}>
+                    {cardItems?.length > 10 ?
+                      <div className={styles.search__item__wrapper} >
+                        <input
+                          type="text"
+                          placeholder="Filter by name"
+                          value={filterName}
+                          onChange={handleFilterChange}
+                          className={styles.search__item}
+                        />
+                      </div> : ""
+                    }
+                    <button
+                      className={styles.refresh__btn}
+                      onClick={handleRefresh}
+                    >
+                      {refreshLoading ? (
+                        <LoadingSpinner
+                          color={'white'}
+                          width={'1rem'}
+                          height={'1rem'}
+                        />
+                      ) : (
+                        <IoIosRefresh />
+                      )}
+                      <span>{t('Refresh')}</span>
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )
+              ) : itemType === 'processes' ? (
+                !processesLoading ? (
+                  <div className={styles.RightBox}>
+                    {cardItems?.length > 12 ?
+                      <div className={styles.search__item__wrapper} >
+                        <input
+                          type="text"
+                          placeholder="Filter by name"
+                          value={filterName}
+                          onChange={handleFilterChange}
+                          className={styles.search__item}
+                        />
+                      </div> : ""
+                    }
+                    <button
+                      className={styles.refresh__btn}
+                      onClick={handleRefresh}
+                    >
+                      {refreshLoading ? (
+                        <LoadingSpinner
+                          color={'white'}
+                          width={'1rem'}
+                          height={'1rem'}
+                        />
+                      ) : (
+                        <IoIosRefresh />
+                      )}
+                      <span>Refresh</span>
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )
+              ) : itemType === 'folders' ? (
+                !isFetchingFolders ? (
+                  <div className={styles.RightBox}>
+                    {cardItems?.length > 12 ?
+                      <div className={styles.search__item__wrapper} >
+                        <input
+                          type="text"
+                          placeholder="Filter by name"
+                          value={filterName}
+                          onChange={handleFilterChange}
+                          className={styles.search__item}
+                        />
+                      </div> : ""
+                    }
+                    <button
+                      className={styles.refresh__btn}
+                      onClick={handleRefresh}
+                    >
+                      {refreshLoading ? (
+                        <LoadingSpinner
+                          color={'white'}
+                          width={'1rem'}
+                          height={'1rem'}
+                        />
+                      ) : (
+                        <IoIosRefresh />
+                      )}
+                      <span>Refresh</span>
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )
+              )
+                : itemType === 'notifications' ? (
+                  !notificationsLoading ? (
+                    <button
+                      className={styles.refresh__btn}
+                      onClick={handleRefresh}
+                    >
+                      {refreshLoading ? (
+                        <LoadingSpinner
+                          color={'white'}
+                          width={'1rem'}
+                          height={'1rem'}
+                        />
+                      ) : (
+                        <IoIosRefresh />
+                      )}
+                      <span>{t('Refresh')}</span>
+                    </button>
+                  ) : (
+                    <></>
+                  )
+                ) : (
+                  <></>
+                )
+            ) : (
+              <></>
+            )}
           </h2>
 
-          {Card &&
+          {status === 'pending' ? (
+            <div style={{ marginTop: '15px' }}>
+              <BookSpinner />
+            </div>
+          ) : (
+            Card &&
             cardItemsVar &&
-            cardItemsVar?.length > 0 && (
+            cardItemsVar.length && (
               <>
                 <div className={styles.grid__box}>
                   {Card &&
                     cardItemsVar &&
                     cardItemsVar?.length > 0 &&
-                    cardItemsVar.slice(0, sliceCount * 18).map((item) => (
-                      <div>
-                        {status === 'pending' ? (<LoadingScreen />) : (<Card
+                    cardItemsVar
+                      .slice(0, sliceCount * 12)
+                      .map((item) => (
+                        <Card
                           key={item?._id}
                           cardItem={item}
-                          LoadingScreen={LoadingScreen}
                           hideFavoriteIcon={hideFavoriteIcon}
                           hideDeleteIcon={hideDeleteIcon}
                           isFolder={itemType === 'folder' ? true : false}
-                          isDocument={itemType === 'documnets' ? true : false}
                           folderId={folderId}
                           isCompletedDoc={isCompleted}
                           isRejectedDoc={isRejected}
                           isReport={isReport}
                           knowledgeCenter={knowledgeCenter}
-                        />)}
-                      </div>
-                    ))}
+                        />
+                      ))}
                 </div>
-                 {/* <div ref={bottomOfPageRef} /> */}
-                {cardItemsVar?.length > sliceCount * 18 && (
-                  <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                    {cardItemsVar?.length > sliceCount * 18 && (
-                      <p
-                        onClick={handleDemoLoadMore}
-                        style={isDemoLoading ? { pointerEvents: 'none' } : {}}
-                        disabled={isDemoLoading}
-                      >
-                        {isDemoLoading ? (
-                          <LoadingSpinner color={'white'} width={'1rem'} height={'1rem'} />
-                        ) : (
-                          'Load More...'
-                        )}
-                      </p>
-                    )}
-                  </div>
-                )}
-                 </>
+                {!isDemo
+                  ? cardItemsVar &&
+                  cardItemsVar?.length > 10 && (
+                    <p
+                      style={{
+                        pointerEvents: `${cardItemsVar.length / 12 < sliceCount && 'none'
+                          }`,
+                      }}
+                      hoverBg='success'
+                      onClick={handleLoadMore}
+                    >
+                      {cardItemsVar.length / 12 < sliceCount
+                        ? 'no more load'
+                        : 'Load more...'}
+                    </p>
+                  )
+                  : cardItemsVar &&
+                  cardItemsVar.length > 12 && (
+                    <p
+                      hoverBg='success'
+                      onClick={handleDemoLoadMore}
+                      style={{
+                        textAlign: 'center',  
+                        pointerEvents: isDemoLoading ? 'none' : 'auto',  
+                        cursor: 'pointer',
+                        marginTop: '20px'
+                      }}
+                      disabled={isDemoLoading}
+
+                      // style={{
+                      //   textAlign: 'center',
+                      //   pointerEvents: `${cardItemsVar.length / 12 < sliceCount ? 'none' : 'auto'}`, // Toggle pointer events
+                      //   cursor: 'pointer',
+                      // }}
+                    >
+                      {isDemoLoading ? (
+                        <LoadingSpinner
+                          color={'white'}
+                          width={'1rem'}
+                          height={'1rem'}
+                        />
+                      ) : (
+                        'Load more...'
+                      )}
+                    </p>
+                  )}
+              </>
+            )
           )}
         </div>
       </div>
