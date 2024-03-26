@@ -147,7 +147,6 @@ const SelectMembersToAssign = ({
 
 
 
-
     useEffect(() => {
       if (selectedMembersSet || !workflowTeamsLoaded ) return;
   
@@ -336,27 +335,19 @@ const SelectMembersToAssign = ({
       currentGroupSelectionItem?.someSelected &&
       !currentGroupSelectionItem?.allSelected
     ) {
+  
       const finalArray = currentGroupSelectionItem?.portfolios
-        ?.filter(
-          (item) => !usedId.some((link) => link?.member === item?.member)
-        )
         ?.slice(0, numberOfPublicMembers)
         .map((team) => {
-          const publicUserAlreadyAdded = publicMembersSelectedForProcess?.find(
-            (pubMember) =>
-              pubMember.member === team.member &&
-              pubMember.portfolio === team.portfolio &&
-              pubMember.stepIndex === currentStepIndex
-          );
-          if (publicUserAlreadyAdded) return null;
           return {
             member: team.member,
             portfolio: team.portfolio,
             stepIndex: currentStepIndex,
           };
-        }).filter((item)=>item);
+        });
+        console.log("publicMembersSelectedForProcess finalArray",finalArray)
 
-       dispatch(setInBatchPublicMembersSelectedForProcess(finalArray));
+       dispatch(setInBatchPublicMembersSelectedForProcess([...publicMembersSelectedForProcess,...finalArray]));
 
       return;
     }
@@ -831,7 +822,7 @@ useEffect(() => {
 }, [current.portfolios,usedId])
 
  return (
-    <div className={styles.container} id='selectTeam'>
+  <div className={styles.container} id='selectTeam'>
       {processSteps?.find(
         (process) => process.workflow === docCurrentWorkflow?._id
       )?.steps[currentStepIndex]?.skipStep ? (
@@ -1206,12 +1197,7 @@ useEffect(() => {
               </div>}
               {current.header!=="Groups"&&
                 <>
-              { current.header==="Public" &&
-                    <p className="sel_count"style={{fontSize: 'inherit' }}>
-                      Selection count: {selectionCount}
-                    </p>
-                  }
-                  { current.header!=="Public" &&  <Radio
+                  <Radio
                     register={register}
                     name={
                       'selectItemOptionForUser-' +
@@ -1272,7 +1258,7 @@ useEffect(() => {
                     <span className="sel_count" style={{ position: 'absolute', top: '0', right: '0', pointerEvents: 'none', fontSize: 'inherit' }}>
                       Selection count: {selectionCount}
                     </span>
-                  </Radio>}
+                  </Radio>
                   {
                       current.header === 'Public' && current.portfolios.filter((item) => !usedId.some((link) => link?.member === item?.member)).length < 1 ?
                       <div style={{padding:'10px'}}>
@@ -1295,8 +1281,7 @@ useEffect(() => {
                         </div>
                         
                       </div>: 
-                      <>
-                       {current.header !== 'Public' &&<div
+                  <div
                     className={styles.select__Members__Wrapper}
                     ref={selectMembersRef}
                   >
@@ -1423,10 +1408,7 @@ useEffect(() => {
                        />
                      </div>
                     ))}
-                  </div>}
-           
-                      </>
-                
+                  </div>
                   }
                 </>
               }
@@ -1446,6 +1428,7 @@ useEffect(() => {
         </>
       )}
     </div>
+  
   );
 };
 
