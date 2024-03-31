@@ -333,7 +333,6 @@ const WorkflowLayout = ({ children }) => {
                 )}
 
                 <div className={styles.children__box}>
-            
                   {
                     creditResponse?.is_active == false   || creditResponse?.total_credits < 100 ?
                     <p className={styles.workflow_check}>
